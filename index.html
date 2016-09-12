@@ -3,6 +3,7 @@
 	<title>Artudis Utils Dashboard</title>
 	<link href="https://fonts.googleapis.com/css?family=Lato|Yatra+One" rel="stylesheet">
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.css" rel="stylesheet">
+	<meta charset="utf-8" /> 
 	<style>
 
 		body {
@@ -12,7 +13,7 @@
 		}
 
 		h1 {			
-			font-family: 'Yatra One', cursive;
+			font-family: 'Yatra One', serif;
 			margin: 0px;
 		}
 
@@ -80,6 +81,18 @@
 	</div>
 	<script>
 
+	function comparepeople(one,two) {
+		if (one['family_name'] < two['family_name'])
+			return -1;
+		if (one['family_name'] > two['family_name'])
+			return 1;
+		if (one['given_name'] < two['given_name'])
+			return -1;
+		if (one['given_name'] > two['given_name'])
+			return 1;
+		return 0;
+	}
+
 	// Load in the local file using a FileReader. 
 	function personSanityCheck_Upload( file ){
 
@@ -126,31 +139,32 @@
 			}
 		}
 
-		var noworkurlheader = document.createElement('h3');
-    	noworkurlheader.innerText = "These people do not have work URLs:";
-    	document.getElementById("person-output").appendChild(noworkurlheader);
+		withoutWorkURL.sort(comparepeople);
 
-    	var noworkurllist = document.createElement('ul');
-    	noworkurllist.id = "noworkurllist"
-    	document.getElementById("person-output").appendChild(noworkurllist);
+		var noworkurlheader = document.createElement('h3');
+		noworkurlheader.textContent = "People without a Work Website Contact → " + withoutWorkURL.length;
+		document.getElementById('person-output').appendChild(noworkurlheader);
+
+		var noworkurllist = document.createElement('ul');
+		noworkurllist.id = "noworkurllist";
+		document.getElementById('person-output').appendChild(noworkurllist);
 
 		for (var i = 0; i < withoutWorkURL.length; i++) {
 			var reportperson = withoutWorkURL[i];
-			var baseURL = document.getElementById("baseURL").value;
+			var baseURL = document.getElementById('baseURL').value;
 
 			var personli = document.createElement('li');
 			var persona = document.createElement('a');
-			var personatext = document.createTextNode(reportperson['family_name'] + ", " + reportperson['given_name']);
-			
+			persona.textContent = reportperson['family_name'] + ", " + reportperson['given_name'];			
 			persona.setAttribute('href', baseURL + "/ppl/" + reportperson['__id__']);
-    		persona.appendChild(personatext);
-    		personli.appendChild(persona);
-    		document.getElementById("noworkurllist").appendChild(personli);
+			persona.setAttribute('target', '_blank');
+			personli.appendChild(persona);
+			document.getElementById('noworkurllist').appendChild(personli);
 		}	
 
 	}	
 
-	document.getElementById("person-input").onchange = function(){
+	document.getElementById('person-input').onchange = function(){
 		personSanityCheck_Upload(this.files[0]);
 	};
 
