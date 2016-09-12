@@ -73,7 +73,7 @@
 			<input id="baseURL" type="text" value="https://ir.library.carleton.ca">
 		</div>
 		<div class="tool-wrapper">
-			<h2>Run Sanity Checks on Person-export.json</h2>		
+			<h2>Run sanity checks on Person-export.json</h2>		
 			<input id="person-input" type="file" accept=".json">
 			<div id="person-output" class="output"></div>
 		</div>
@@ -120,6 +120,7 @@
 					var contact = person['contact'][j];
 					if (contact['role'] == "work" && typeof contact['website'] === "string" && contact['website'].length > 1 ){
 						withoutWorkURL.pop();
+						break;
 					}
 				}
 			}
