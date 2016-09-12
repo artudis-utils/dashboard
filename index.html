@@ -1,6 +1,158 @@
 <html>
 <head>
+	<title>Artudis Utils Dashboard</title>
+	<link href="https://fonts.googleapis.com/css?family=Lato|Yatra+One" rel="stylesheet">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.css" rel="stylesheet">
+	<style>
+
+		body {
+			font-family: 'Lato', sans-serif;
+			background: #C8E0F4;
+			color: #031927;
+		}
+
+		h1 {			
+			font-family: 'Yatra One', cursive;
+			margin: 0px;
+		}
+
+		section {
+			padding-left: 1rem;
+		}
+
+		header {
+			text-align: center;
+			margin: 1rem 0px;
+		}
+
+		header h1 {
+			margin-bottom: 0px;
+		}
+
+		header p {
+			margin-top: 0.1rem;
+		}
+
+		#all-tools-wrapper {
+			margin: 1rem;
+			border-top: thin solid #508AA8;
+		}
+
+		.tool-wrapper {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;
+			border-bottom: thin solid #508AA8;
+			padding-bottom: 1rem;
+		}
+
+		.tool-wrapper h2 {
+			flex: 1 1 auto;
+		}
+
+		.tool-wrapper input {
+			flex: 4 1 auto;	
+			min-width: 50%;	
+		}
+
+		.tool-wrapper .output {
+			min-width: 100%;	
+			margin-bottom: 0px;
+		}
+
+	</style>
 </head>
 <body>
+	<header>
+		<h1>Artudis Utils Dashboard</h1>
+		<p>A set of tools for the Artudis IR.</p>
+	</header>
+	<div id="all-tools-wrapper">
+		<div class="tool-wrapper">
+			<h2>What is your Artudis base URL?</h2>		
+			<input id="baseURL" type="text" value="https://ir.library.carleton.ca">
+		</div>
+		<div class="tool-wrapper">
+			<h2>Run Sanity Checks on Person-export.json</h2>		
+			<input id="person-input" type="file" accept=".json">
+			<div id="person-output" class="output"></div>
+		</div>
+	</div>
+	<script>
+
+	// Load in the local file using a FileReader. 
+	function personSanityCheck_Upload( file ){
+
+		//Clear the old output
+		document.getElementById("person-output").innerHTML = "";
+
+		var reader = new FileReader();
+		reader.onload = function( event ) {  
+			personSanityCheck_Process(event.target.result); 
+		}		
+		reader.readAsText(file);
+	}
+
+	// Process the contents of the JSON file line by line. 
+	// Find people who raise red flags. 
+	function personSanityCheck_Process( filecontents ){
+
+		var withoutWorkURL = [];
+
+		var filelines = filecontents.split("\n");
+		for (var i = 0; i < filelines.length; i++) {
+
+			var line = filelines[i];	
+
+			// If the line is empty, don't try to parse as JSON.
+			if (line.trim() == "") {
+				continue;
+			}
+
+			var person = JSON.parse(line);
+
+			// Instead of whitelisting, we add everyone to the blacklist,
+			// then remove people who meet the criteria. 
+			withoutWorkURL.push(person);	
+
+			if (typeof person['contact'] !== 'undefined' && person['contact'].length > 0) {
+				for (var j = 0; j < person['contact'].length; j++){ 
+					var contact = person['contact'][j];
+					if (contact['role'] == "work" && typeof contact['website'] === "string" && contact['website'].length > 1 ){
+						withoutWorkURL.pop();
+					}
+				}
+			}
+		}
+
+		var noworkurlheader = document.createElement('h3');
+    	noworkurlheader.innerText = "These people do not have work URLs:";
+    	document.getElementById("person-output").appendChild(noworkurlheader);
+
+    	var noworkurllist = document.createElement('ul');
+    	noworkurllist.id = "noworkurllist"
+    	document.getElementById("person-output").appendChild(noworkurllist);
+
+		for (var i = 0; i < withoutWorkURL.length; i++) {
+			var reportperson = withoutWorkURL[i];
+			var baseURL = document.getElementById("baseURL").value;
+
+			var personli = document.createElement('li');
+			var persona = document.createElement('a');
+			var personatext = document.createTextNode(reportperson['family_name'] + ", " + reportperson['given_name']);
+			
+			persona.setAttribute('href', baseURL + "/ppl/" + reportperson['__id__']);
+    		persona.appendChild(personatext);
+    		personli.appendChild(persona);
+    		document.getElementById("noworkurllist").appendChild(personli);
+		}	
+
+	}	
+
+	document.getElementById("person-input").onchange = function(){
+		personSanityCheck_Upload(this.files[0]);
+	};
+
+	</script>
 </body>
 </html>
