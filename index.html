@@ -51,15 +51,42 @@
 			flex: 1 1 auto;
 		}
 
-		.tool-wrapper input {
-			flex: 4 1 auto;	
-			min-width: 50%;	
+		.tool-wrapper .checkbox-group{
+			flex: 1 1 auto;
 		}
 
-		.tool-wrapper .output {
+		.tool-wrapper a {
+			flex: 1 1 auto;
+			margin-right: 1rem;
+		}
+
+		#baseURL{
+			flex: 1 1 auto;
+		}
+
+		.tool-wrapper input[type=file] {
+			flex: 3 1 auto;	
+		}
+
+		.output {
 			min-width: 100%;	
 			margin-bottom: 0px;
+			display: flex;
+			flex-wrap: wrap;
 		}
+
+		.checkoutput {
+			background: #e5f1fa;  
+			border-radius: 1rem;
+			padding: 1rem;
+			margin-right: 1rem;
+			margin-top: 1rem;
+		}
+
+		.checkoutput h3 {
+			margin-top: 0px;
+		}
+
 
 	</style>
 </head>
@@ -71,10 +98,15 @@
 	<div id="all-tools-wrapper">
 		<div class="tool-wrapper">
 			<h2>What is your Artudis base URL?</h2>		
-			<input id="baseURL" type="text" value="https://ir.library.carleton.ca">
+			<input id="baseURL" type="url" value="https://ir.library.carleton.ca">
 		</div>
 		<div class="tool-wrapper">
-			<h2>Run sanity checks on Person-export.json</h2>		
+			<h2>Run sanity checks on Person-export.json</h2>	
+			<a class="download-link" href="https://ir.library.carleton.ca/ppl/manage" target="_blank">Download from Artudis</a>
+			<div class="checkbox-group">
+				<label for="person_nonamevariant">Include No Name Variant Check</label>
+				<input type="checkbox" id="person_nonamevariant" name="person_nonamevariant">
+			</div>
 			<input id="person-input" type="file" accept=".json">
 			<div id="person-output" class="output"></div>
 		</div>
@@ -106,11 +138,48 @@
 		reader.readAsText(file);
 	}
 
+	function buildPeopleList( people ){
+
+		people.sort(comparepeople);
+
+		var peoplelist = document.createElement('ul');
+
+		for (var i = 0; i < people.length; i++) {
+			var reportperson = people[i];
+			var baseURL = document.getElementById('baseURL').value;
+
+			var personli = document.createElement('li');
+			var persona = document.createElement('a');
+			persona.textContent = reportperson['family_name'] + ", " + reportperson['given_name'];			
+			persona.setAttribute('href', baseURL + "/ppl/" + reportperson['__id__']);
+			persona.setAttribute('target', '_blank');
+			personli.appendChild(persona);
+			peoplelist.appendChild(personli);
+		}	
+
+		return peoplelist;
+	}
+
+	function addOutput( outputid, headertext, list ){
+		var outputdiv = document.createElement('div');
+		outputdiv.className = "checkoutput";
+		document.getElementById(outputid).appendChild(outputdiv);
+
+		var header = document.createElement('h3');
+		header.textContent = headertext;
+		outputdiv.appendChild(header);
+
+		outputdiv.appendChild(list);		
+	}
+
 	// Process the contents of the JSON file line by line. 
 	// Find people who raise red flags. 
 	function personSanityCheck_Process( filecontents ){
 
 		var withoutWorkURL = [];
+		var withoutIdentifiers = [];
+		var withoutEmployer = [];
+		var withoutNameVariant = [];
 
 		var filelines = filecontents.split("\n");
 		for (var i = 0; i < filelines.length; i++) {
@@ -126,8 +195,9 @@
 
 			// Instead of whitelisting, we add everyone to the blacklist,
 			// then remove people who meet the criteria. 
-			withoutWorkURL.push(person);	
 
+			// Work URLS
+			withoutWorkURL.push(person);
 			if (typeof person['contact'] !== 'undefined' && person['contact'].length > 0) {
 				for (var j = 0; j < person['contact'].length; j++){ 
 					var contact = person['contact'][j];
@@ -137,35 +207,74 @@
 					}
 				}
 			}
+
+			// Identifiers
+			withoutIdentifiers.push(person);	
+			if (typeof person['identifier'] !== 'undefined' && person['identifier'].length > 0) {
+				withoutIdentifiers.pop()
+			}
+
+			// Employer
+			withoutEmployer.push(person);
+       		if (typeof person['affiliation'] !== 'undefined' && person['affiliation'].length > 0) {
+				for (var j = 0; j < person['affiliation'].length; j++){ 
+					var affiliation = person['affiliation'][j];
+					if (affiliation['role'] == "employer" ){
+						withoutEmployer.pop();
+						break;
+					}
+				}
+       		}
+
+       		// Name Variant
+			withoutNameVariant.push(person);
+       		if (typeof person['name_info'] !== 'undefined' && person['name_info'].length > 0) {
+				for (var j = 0; j < person['name_info'].length; j++){ 
+					var nameinfo = person['name_info'][j];
+					if (nameinfo['type'] == "alternative" ){
+						withoutNameVariant.pop();
+						break;
+					}
+				}
+       		}
+
+		}
+		
+		addOutput("person-output", 
+					"People without a Work Website Contact → " + withoutWorkURL.length, 
+					buildPeopleList(withoutWorkURL));
+
+		addOutput("person-output", 
+					"People without an Identifier → " + withoutIdentifiers.length, 
+					buildPeopleList(withoutIdentifiers));
+
+		addOutput("person-output", 
+					"People without an Employer Affiliation → " + withoutEmployer.length, 
+					buildPeopleList(withoutEmployer));
+
+		if (document.getElementById("person_nonamevariant").checked){
+			addOutput("person-output", 
+					"People without an Alternative Name → " + withoutNameVariant.length, 
+					buildPeopleList(withoutNameVariant));
 		}
 
-		withoutWorkURL.sort(comparepeople);
-
-		var noworkurlheader = document.createElement('h3');
-		noworkurlheader.textContent = "People without a Work Website Contact → " + withoutWorkURL.length;
-		document.getElementById('person-output').appendChild(noworkurlheader);
-
-		var noworkurllist = document.createElement('ul');
-		noworkurllist.id = "noworkurllist";
-		document.getElementById('person-output').appendChild(noworkurllist);
-
-		for (var i = 0; i < withoutWorkURL.length; i++) {
-			var reportperson = withoutWorkURL[i];
-			var baseURL = document.getElementById('baseURL').value;
-
-			var personli = document.createElement('li');
-			var persona = document.createElement('a');
-			persona.textContent = reportperson['family_name'] + ", " + reportperson['given_name'];			
-			persona.setAttribute('href', baseURL + "/ppl/" + reportperson['__id__']);
-			persona.setAttribute('target', '_blank');
-			personli.appendChild(persona);
-			document.getElementById('noworkurllist').appendChild(personli);
-		}	
 
 	}	
 
 	document.getElementById('person-input').onchange = function(){
 		personSanityCheck_Upload(this.files[0]);
+		this.value = "";
+	};
+
+	document.getElementById('baseURL').onchange = function(){
+		console.log("change!");
+		var links = document.getElementsByClassName('download-link');
+		for (var i = 0; i < links.length; i++) {
+			console.log(links[i].getAttribute('href'))
+			links[i].setAttribute('href', 
+				links[i].getAttribute('href').replace(
+					new RegExp("^https?://[a-zA-Z\.]*/"), this.value + "/"));
+		}
 	};
 
 	</script>
