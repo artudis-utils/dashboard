@@ -1,282 +1,451 @@
 <html>
 <head>
-	<title>Artudis Utils Dashboard</title>
-	<link href="https://fonts.googleapis.com/css?family=Lato|Yatra+One" rel="stylesheet">
-	<link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.css" rel="stylesheet">
-	<meta charset="utf-8" /> 
-	<style>
+    <title>Artudis Utils Dashboard</title>
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.css" rel="stylesheet">
+    <meta charset="utf-8" /> 
+    <style>
 
-		body {
-			font-family: 'Lato', sans-serif;
-			background: #C8E0F4;
-			color: #031927;
-		}
+        body {
+            font-family: "Source Sans Pro","Arial Narrow Bold",sans-serif;
+            background: #f7f7f7;
+            color: #031927;
+        }
 
-		h1 {			
-			font-family: 'Yatra One', serif;
-			margin: 0px;
-		}
+        h1 {         
+            margin: 0px;
+        }
 
-		section {
-			padding-left: 1rem;
-		}
+        section {
+            padding-left: 1rem;
+        }
 
-		header {
-			text-align: center;
-			margin: 1rem 0px;
-		}
+        header {
+            text-align: center;
+            margin: 1rem 0px;
+        }
 
-		header h1 {
-			margin-bottom: 0px;
-		}
+        header h1 {
+            margin-bottom: 0px;
+        }
 
-		header p {
-			margin-top: 0.1rem;
-		}
+        header p {
+            margin-top: 0.1rem;
+        }
 
-		#all-tools-wrapper {
-			margin: 1rem;
-			border-top: thin solid #508AA8;
-		}
+        #all-tools-wrapper {
+            margin: 1rem;
+            border-top: thin solid #eeeeee;
+        }
 
-		.tool-wrapper {
-			display: flex;
-			flex-wrap: wrap;
-			align-items: center;
-			border-bottom: thin solid #508AA8;
-			padding-bottom: 1rem;
-		}
+        .tool-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: thin solid #eeeeee;
+            padding-bottom: 1rem;
+        }
 
-		.tool-wrapper h2 {
-			flex: 1 1 auto;
-		}
+        .tool-wrapper h2 {
+            flex: 1 1 auto;
+        }
 
-		.tool-wrapper .checkbox-group{
-			flex: 1 1 auto;
-		}
+        .tool-wrapper .download-input-wrapper a {
+            margin-right: 1rem;
+        }
 
-		.tool-wrapper a {
-			flex: 1 1 auto;
-			margin-right: 1rem;
-		}
+        .tool-wrapper .checkbox-group{
+            flex: 1 1 auto;
+        }
 
-		#baseURL{
-			flex: 1 1 auto;
-		}
+        #baseURL{
+            flex: 1 1 auto;
+        }
 
-		.tool-wrapper input[type=file] {
-			flex: 3 1 auto;	
-		}
+        .output {
+            min-width: 100%;    
+            margin-bottom: 0px;
+            display: flex;
+            flex-wrap: wrap;
+        }
 
-		.output {
-			min-width: 100%;	
-			margin-bottom: 0px;
-			display: flex;
-			flex-wrap: wrap;
-		}
+        .checkoutput {
+            padding: 1rem;
+            margin-right: 1rem;
+            margin-top: 1rem;
+        }
 
-		.checkoutput {
-			background: #e5f1fa;  
-			border-radius: 1rem;
-			padding: 1rem;
-			margin-right: 1rem;
-			margin-top: 1rem;
-		}
+        .checkoutput ul{
+            padding-left: 25px;
+        }
 
-		.checkoutput h3 {
-			margin-top: 0px;
-		}
+        .checkoutput h3 {
+            margin-top: 0px;
+            padding-bottom: 0.5rem;
+            border-bottom: thin solid #c1bebe;
+        }
 
 
-	</style>
+    </style>
 </head>
 <body>
-	<header>
-		<h1>Artudis Utils Dashboard</h1>
-		<p>A set of tools for the Artudis IR.</p>
-	</header>
-	<div id="all-tools-wrapper">
-		<div class="tool-wrapper">
-			<h2>What is your Artudis base URL?</h2>		
-			<input id="baseURL" type="url" value="https://ir.library.carleton.ca">
-		</div>
-		<div class="tool-wrapper">
-			<h2>Run sanity checks on Person-export.json</h2>	
-			<a class="download-link" href="https://ir.library.carleton.ca/ppl/manage" target="_blank">Download from Artudis</a>
-			<div class="checkbox-group">
-				<label for="person_nonamevariant">Include No Name Variant Check</label>
-				<input type="checkbox" id="person_nonamevariant" name="person_nonamevariant">
-			</div>
-			<input id="person-input" type="file" accept=".json">
-			<div id="person-output" class="output"></div>
-		</div>
-	</div>
-	<script>
+    <header>
+        <h1>Artudis Utils Dashboard</h1>
+        <p>A set of tools for the Artudis IR.</p>
+    </header>
+    <div id="all-tools-wrapper">
+        <div class="tool-wrapper">
+            <h2>What is your Artudis base URL?</h2>     
+            <input id="baseURL" type="url" value="https://ir.library.carleton.ca">
+        </div>
+        <div class="tool-wrapper">
+            <h2>Run sanity checks on Person-export.json</h2>   
+            <div class="checkbox-group">
+                <label for="person_nonamevariant">Include No Name Variant Check</label>
+                <input type="checkbox" id="person_nonamevariant" name="person_nonamevariant">
+            </div> 
+            <div class="download-input-wrapper">
+                <a class="download-link" href="https://ir.library.carleton.ca/ppl/manage" target="_blank">Download from Artudis</a>
+                <input id="person-input" type="file" accept=".json">
+            </div>
+            <div id="person-output" class="output"></div>
+        </div>
+        <div class="tool-wrapper">
+            <h2>Run sanity checks on Organisation-export.json</h2>  
+            <div class="download-input-wrapper">
+                <a class="download-link" href="https://ir.library.carleton.ca/org/manage" target="_blank">Download from Artudis</a>
+                <input id="org-input" type="file" accept=".json">
+            </div>
+            <div id="org-output" class="output"></div>
+        </div>
+    </div>
+    <script>
 
-	function comparepeople(one,two) {
-		if (one['family_name'] < two['family_name'])
-			return -1;
-		if (one['family_name'] > two['family_name'])
-			return 1;
-		if (one['given_name'] < two['given_name'])
-			return -1;
-		if (one['given_name'] > two['given_name'])
-			return 1;
-		return 0;
-	}
+    // Add a column of output to a tool
+    function addOutput( outputid, headertext, list ){
+        var outputdiv = document.createElement('div');
+        outputdiv.className = "checkoutput";
+        document.getElementById(outputid).appendChild(outputdiv);
 
-	// Load in the local file using a FileReader. 
-	function personSanityCheck_Upload( file ){
+        var header = document.createElement('h3');
+        header.textContent = headertext;
+        outputdiv.appendChild(header);
 
-		//Clear the old output
-		document.getElementById("person-output").innerHTML = "";
+        outputdiv.appendChild(list);        
+    }       
 
-		var reader = new FileReader();
-		reader.onload = function( event ) {  
-			personSanityCheck_Process(event.target.result); 
-		}		
-		reader.readAsText(file);
-	}
+    document.getElementById('baseURL').onchange = function(){
+        var links = document.getElementsByClassName('download-link');
+        for (var i = 0; i < links.length; i++) {
+            console.log(links[i].getAttribute('href'))
+            links[i].setAttribute('href', 
+                links[i].getAttribute('href').replace(
+                    new RegExp("^https?://[a-zA-Z\.]*/"), this.value + "/"));
+        }
+    };
 
-	function buildPeopleList( people ){
+    // ----- People -----
 
-		people.sort(comparepeople);
+    // Compare people for sorting 
+    function comparepeople(one,two) {
+        if (one['family_name'] < two['family_name'])
+            return -1;
+        if (one['family_name'] > two['family_name'])
+            return 1;
+        if (one['given_name'] < two['given_name'])
+            return -1;
+        if (one['given_name'] > two['given_name'])
+            return 1;
+        return 0;
+    }
 
-		var peoplelist = document.createElement('ul');
+    // Build a ul element from an array of People
+    function buildPeopleList( people, labels=false ){
 
-		for (var i = 0; i < people.length; i++) {
-			var reportperson = people[i];
-			var baseURL = document.getElementById('baseURL').value;
+        people.sort(comparepeople);
 
-			var personli = document.createElement('li');
-			var persona = document.createElement('a');
-			persona.textContent = reportperson['family_name'] + ", " + reportperson['given_name'];			
-			persona.setAttribute('href', baseURL + "/ppl/" + reportperson['__id__']);
-			persona.setAttribute('target', '_blank');
-			personli.appendChild(persona);
-			peoplelist.appendChild(personli);
-		}	
+        var peoplelist = document.createElement('ul');
 
-		return peoplelist;
-	}
+        for (var i = 0; i < people.length; i++) {
+            var person = people[i];
+            var baseURL = document.getElementById('baseURL').value;
 
-	function addOutput( outputid, headertext, list ){
-		var outputdiv = document.createElement('div');
-		outputdiv.className = "checkoutput";
-		document.getElementById(outputid).appendChild(outputdiv);
+            var personli = document.createElement('li');
+            var persona = document.createElement('a');
+            persona.textContent = person['family_name'] + ", " + person['given_name'];          
+            persona.setAttribute('href', baseURL + "/ppl/" + person['__id__']);
+            persona.setAttribute('target', '_blank');
+            personli.appendChild(persona);
 
-		var header = document.createElement('h3');
-		header.textContent = headertext;
-		outputdiv.appendChild(header);
+            if (labels === true && typeof person['labels'] !== 'undefined' ) {
+                var personlabel = document.createElement('span');
+                for (var j = 0; j < person['labels'].length; j++){
+                    personlabel.textContent += person['labels'][j] + " ";
+                }
+                personli.appendChild(personlabel);
+            }
+            peoplelist.appendChild(personli);
+        }   
 
-		outputdiv.appendChild(list);		
-	}
+        return peoplelist;
+    }
 
-	// Process the contents of the JSON file line by line. 
-	// Find people who raise red flags. 
-	function personSanityCheck_Process( filecontents ){
+    // Load in the local file using a FileReader. 
+    function personSanityCheck_Upload( file ){
 
-		var withoutWorkURL = [];
-		var withoutIdentifiers = [];
-		var withoutEmployer = [];
-		var withoutNameVariant = [];
+        //Clear the old output
+        document.getElementById("person-output").innerHTML = "";
 
-		var filelines = filecontents.split("\n");
-		for (var i = 0; i < filelines.length; i++) {
+        var reader = new FileReader();
+        reader.onload = function( event ) {  
+            personSanityCheck_Process(event.target.result); 
+        }       
+        reader.readAsText(file);
+    }
 
-			var line = filelines[i];	
+    // Process the contents of the JSON file line by line. 
+    // Find people who raise red flags. 
+    function personSanityCheck_Process( filecontents ){
 
-			// If the line is empty, don't try to parse as JSON.
-			if (line.trim() == "") {
-				continue;
-			}
+        var withoutWorkURL = [];
+        var withoutIdentifiers = [];
+        var withoutEmployer = [];
+        var withoutNameVariant = [];
+        var withDuplicateIdentifiers = [];
 
-			var person = JSON.parse(line);
+        var filelines = filecontents.split("\n");
+        for (var i = 0; i < filelines.length; i++) {
 
-			// Instead of whitelisting, we add everyone to the blacklist,
-			// then remove people who meet the criteria. 
+            var line = filelines[i];    
 
-			// Work URLS
-			withoutWorkURL.push(person);
-			if (typeof person['contact'] !== 'undefined' && person['contact'].length > 0) {
-				for (var j = 0; j < person['contact'].length; j++){ 
-					var contact = person['contact'][j];
-					if (contact['role'] == "work" && typeof contact['website'] === "string" && contact['website'].length > 1 ){
-						withoutWorkURL.pop();
-						break;
-					}
-				}
-			}
+            // If the line is empty, don't try to parse as JSON.
+            if (line.trim() == "") {
+                continue;
+            }
 
-			// Identifiers
-			withoutIdentifiers.push(person);	
-			if (typeof person['identifier'] !== 'undefined' && person['identifier'].length > 0) {
-				withoutIdentifiers.pop()
-			}
+            var person = JSON.parse(line);
 
-			// Employer
-			withoutEmployer.push(person);
-       		if (typeof person['affiliation'] !== 'undefined' && person['affiliation'].length > 0) {
-				for (var j = 0; j < person['affiliation'].length; j++){ 
-					var affiliation = person['affiliation'][j];
-					if (affiliation['role'] == "employer" ){
-						withoutEmployer.pop();
-						break;
-					}
-				}
-       		}
+            // Instead of whitelisting, we add everyone to the blacklist,
+            // then remove people who meet the criteria. 
 
-       		// Name Variant
-			withoutNameVariant.push(person);
-       		if (typeof person['name_info'] !== 'undefined' && person['name_info'].length > 0) {
-				for (var j = 0; j < person['name_info'].length; j++){ 
-					var nameinfo = person['name_info'][j];
-					if (nameinfo['type'] == "alternative" ){
-						withoutNameVariant.pop();
-						break;
-					}
-				}
-       		}
+            // Work URLS
+            withoutWorkURL.push(person);
+            if (typeof person['contact'] !== 'undefined' && person['contact'].length > 0) {
+                for (var j = 0; j < person['contact'].length; j++){ 
+                    var contact = person['contact'][j];
+                    if (contact['role'] == "work" && typeof contact['website'] === "string" && contact['website'].length > 1 ){
+                        withoutWorkURL.pop();
+                        break;
+                    }
+                }
+            }
 
-		}
-		
-		addOutput("person-output", 
-					"People without a Work Website Contact → " + withoutWorkURL.length, 
-					buildPeopleList(withoutWorkURL));
+            // Identifiers
+            withoutIdentifiers.push(person);    
+            if (typeof person['identifier'] !== 'undefined' && person['identifier'].length > 0) {
+                withoutIdentifiers.pop()
+            }
 
-		addOutput("person-output", 
-					"People without an Identifier → " + withoutIdentifiers.length, 
-					buildPeopleList(withoutIdentifiers));
+            // Employer
+            withoutEmployer.push(person);
+            if (typeof person['affiliation'] !== 'undefined' && person['affiliation'].length > 0) {
+                for (var j = 0; j < person['affiliation'].length; j++){ 
+                    var affiliation = person['affiliation'][j];
+                    if (affiliation['role'] == "employer" ){
+                        withoutEmployer.pop();
+                        break;
+                    }
+                }
+            }
 
-		addOutput("person-output", 
-					"People without an Employer Affiliation → " + withoutEmployer.length, 
-					buildPeopleList(withoutEmployer));
+            // Name Variant
+            withoutNameVariant.push(person);
+            if (typeof person['name_info'] !== 'undefined' && person['name_info'].length > 0) {
+                for (var j = 0; j < person['name_info'].length; j++){ 
+                    var nameinfo = person['name_info'][j];
+                    if (nameinfo['type'] == "alternative" ){
+                        withoutNameVariant.pop();
+                        break;
+                    }
+                }
+            }
 
-		if (document.getElementById("person_nonamevariant").checked){
-			addOutput("person-output", 
-					"People without an Alternative Name → " + withoutNameVariant.length, 
-					buildPeopleList(withoutNameVariant));
-		}
+            // Duplicate Identifiers
+            person['labels'] = [];
+            if (typeof person['identifier'] !== 'undefined' && person['identifier'].length > 0) {
+                var listOfSchemes = [];
+                for (var j = 0; j < person['identifier'].length; j++){ 
+                    var scheme = person['identifier'][j]['scheme'];
+                    if (listOfSchemes.indexOf(scheme) > -1 && person['labels'].indexOf(scheme) === -1){
+                        person['labels'].push(scheme);
+                    } else {
+                        listOfSchemes.push(scheme);
+                    }
+
+                }
+            }
+            if (person['labels'].length > 0){
+                withDuplicateIdentifiers.push(person);
+            }
 
 
-	}	
+        }
+        
+        addOutput("person-output", 
+                    "People without a Work Website Contact → " + withoutWorkURL.length, 
+                    buildPeopleList(withoutWorkURL));
 
-	document.getElementById('person-input').onchange = function(){
-		personSanityCheck_Upload(this.files[0]);
-		this.value = "";
-	};
+        addOutput("person-output", 
+                    "People without an Identifier → " + withoutIdentifiers.length, 
+                    buildPeopleList(withoutIdentifiers));
 
-	document.getElementById('baseURL').onchange = function(){
-		console.log("change!");
-		var links = document.getElementsByClassName('download-link');
-		for (var i = 0; i < links.length; i++) {
-			console.log(links[i].getAttribute('href'))
-			links[i].setAttribute('href', 
-				links[i].getAttribute('href').replace(
-					new RegExp("^https?://[a-zA-Z\.]*/"), this.value + "/"));
-		}
-	};
+        addOutput("person-output", 
+                    "People without an Employer Affiliation → " + withoutEmployer.length, 
+                    buildPeopleList(withoutEmployer));
 
-	</script>
+        if (document.getElementById("person_nonamevariant").checked){
+            addOutput("person-output", 
+                    "People without an Alternative Name → " + withoutNameVariant.length, 
+                    buildPeopleList(withoutNameVariant));
+        }
+
+        addOutput("person-output", 
+                    "People with Duplicate Identifier Schemes → " + withDuplicateIdentifiers.length, 
+                    buildPeopleList(withDuplicateIdentifiers, true));
+
+
+    }   
+
+    document.getElementById('person-input').onchange = function(){
+        personSanityCheck_Upload(this.files[0]);
+        this.value = "";
+    };
+
+    // ----- Organizations -----
+
+    // Compare orgs for sorting 
+    function compareorgs(one,two) {
+        if (one['name'] < two['name'])
+            return -1;
+        if (one['name'] > two['name'])
+            return 1;
+        return 0;
+    }
+
+    // Build a ul element from an array of Orgs
+    function buildOrgList( orgs ){
+
+        orgs.sort(compareorgs);
+
+        var orglist = document.createElement('ul');
+
+        for (var i = 0; i < orgs.length; i++) {
+            var org = orgs[i];
+            var baseURL = document.getElementById('baseURL').value;
+
+            var orgli = document.createElement('li');
+            var orga = document.createElement('a');
+            orga.textContent = org['name'];     
+            orga.setAttribute('href', baseURL + "/org/" + org['__id__']);
+            orga.setAttribute('target', '_blank');
+            orgli.appendChild(orga);
+           
+            orglist.appendChild(orgli);
+        }   
+
+        return orglist;
+    }
+
+    // Load in the local file using a FileReader. 
+    function orgSanityCheck_Upload( file ){
+
+        //Clear the old output
+        document.getElementById("org-output").innerHTML = "";
+
+        var reader = new FileReader();
+        reader.onload = function( event ) {  
+            orgSanityCheck_Process(event.target.result); 
+        }       
+        reader.readAsText(file);
+    }
+
+    // Process the contents of the JSON file line by line. 
+    // Find orgs who raise red flags. 
+    function orgSanityCheck_Process( filecontents ){
+
+        var withoutDescriptions = [];
+        var withoutHomepages = [];
+        var withoutRelation = [];
+
+        var filelines = filecontents.split("\n");
+        for (var i = 0; i < filelines.length; i++) {
+
+            var line = filelines[i];    
+
+            // If the line is empty, don't try to parse as JSON.
+            if (line.trim() == "") {
+                continue;
+            }
+
+            var org = JSON.parse(line);
+
+            // Instead of whitelisting, we add everyone to the blacklist,
+            // then remove people who meet the criteria. 
+
+            // Descriptions 
+            withoutDescriptions.push(org);
+            if (typeof org['description'] !== 'undefined' && org['description'].length > 0) {
+                for (var j = 0; j < org['description'].length; j++){ 
+                    var description = org['description'][j];
+                    if (description['type'] == "description" && description['value'].length > 1 ){
+                        withoutDescriptions.pop();
+                        break;
+                    }
+                }
+            }
+
+            // Homepages
+            withoutHomepages.push(org);
+            if (typeof org['contact'] !== 'undefined' && org['contact'].length > 0) {
+                for (var j = 0; j < org['contact'].length; j++){ 
+                    var contact = org['contact'][j];
+                    if(contact.hasOwnProperty('website') && contact['website'] !== null && contact['website'].length > 1){
+                        withoutHomepages.pop();
+                        break;
+                    }
+                }
+            }
+
+            // Relation
+            withoutRelation.push(org);
+            if (typeof org['relation'] !== 'undefined' && org['relation'].length > 0){
+                withoutRelation.pop();
+            }
+
+
+        }
+        
+        addOutput("org-output", 
+                    "Organizations without a description → " + withoutDescriptions.length, 
+                    buildOrgList(withoutDescriptions));
+
+        addOutput("org-output", 
+                    "Organizations without a website contact → " + withoutHomepages.length, 
+                    buildOrgList(withoutHomepages));
+
+        addOutput("org-output", 
+                    "Organizations without any relations → " + withoutRelation.length, 
+                    buildOrgList(withoutRelation));
+
+
+    }
+
+    document.getElementById('org-input').onchange = function(){
+        orgSanityCheck_Upload(this.files[0]);
+        this.value = "";
+    };
+
+    </script>
 </body>
 </html>
