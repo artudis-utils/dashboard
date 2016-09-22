@@ -221,28 +221,62 @@
 		return peoplelist;
 	}
 
+	// Build a ul element from an object of duplicate People
+	function buildDuplicatePeopleList( peopleDuplicates ){
+
+		var duplicatelist = document.createElement('ul');
+
+		for (var name in peopleDuplicates) {
+
+			var peopleWithDuplicateNames = peopleDuplicates[name];
+
+			var duplcateitem = document.createElement('li');
+			var duplicatesublist = document.createElement('ul');
+
+			for (var i = 0; i < peopleWithDuplicateNames.length; i++) {
+				var person = peopleWithDuplicateNames[i];
+				var personli = document.createElement('li');
+				var baseURL = document.getElementById('baseURL').value;
+				var persona = document.createElement('a');
+	
+				persona.textContent = person['family_name'] + ", " + person['given_name'] + " (" + person['__id__'] + ")";          
+				persona.setAttribute('href', baseURL + "/ppl/" + person['__id__']);
+				persona.setAttribute('target', '_blank');
+				personli.appendChild(persona);
+				duplicatesublist.appendChild(personli);
+			}			
+			
+			duplcateitem.appendChild(duplicatesublist);
+			duplicatelist.appendChild(duplcateitem);
+		}   
+
+		return duplicatelist;
+	}
+
 	// Load in the local file using a FileReader. 
-	function personSanityCheck_Upload( file ){
+	function personCheck_Upload( file ){
 
 		//Clear the old output
 		document.getElementById("person-output").innerHTML = "";
 
 		var reader = new FileReader();
 		reader.onload = function( event ) {  
-			personSanityCheck_Process(event.target.result); 
+			personCheck_Process(event.target.result); 
 		}       
 		reader.readAsText(file);
 	}
 
 	// Process the contents of the JSON file line by line. 
 	// Find people who raise red flags. 
-	function personSanityCheck_Process( filecontents ){
+	function personCheck_Process( filecontents ){
 
 		var withoutWorkURL = [];
 		var withoutIdentifiers = [];
 		var withoutEmployer = [];
 		var withoutNameVariant = [];
 		var withDuplicateIdentifiers = [];
+
+		var peopleDuplicates = {};
 
 		var filelines = filecontents.split("\n");
 		for (var i = 0; i < filelines.length; i++) {
@@ -319,9 +353,16 @@
 				withDuplicateIdentifiers.push(person);
 			}
 
+			// Duplicate Names
+			var name = person['given_name'] + " " + person['family_name'];
+			if (name in peopleDuplicates){
+				peopleDuplicates[name].push(person);
+			} else {
+				peopleDuplicates[name] = [person];
+			}
 
 		}
-		
+	
 		addOutput("person-output", 
 					"People without a Work Website Contact → " + withoutWorkURL.length, 
 					buildPeopleList(withoutWorkURL));
@@ -344,11 +385,20 @@
 					"People with Duplicate Identifier Schemes → " + withDuplicateIdentifiers.length, 
 					buildPeopleList(withDuplicateIdentifiers, true));
 
+		for (var name in peopleDuplicates) {
+ 			if (peopleDuplicates[name].length < 2 ){
+ 				delete peopleDuplicates[name];
+ 			}
+		}
+
+		addOutput("person-output", 
+					"Same Name Multiple People → " + Object.keys(peopleDuplicates).length, 
+					buildDuplicatePeopleList(peopleDuplicates));
 
 	}   
 
 	document.getElementById('person-input').onchange = function(){
-		personSanityCheck_Upload(this.files[0]);
+		personCheck_Upload(this.files[0]);
 		this.value = "";
 	};
 
@@ -388,21 +438,21 @@
 	}
 
 	// Load in the local file using a FileReader. 
-	function orgSanityCheck_Upload( file ){
+	function orgCheck_Upload( file ){
 
 		//Clear the old output
 		document.getElementById("org-output").innerHTML = "";
 
 		var reader = new FileReader();
 		reader.onload = function( event ) {  
-			orgSanityCheck_Process(event.target.result); 
+			orgCheck_Process(event.target.result); 
 		}       
 		reader.readAsText(file);
 	}
 
 	// Process the contents of the JSON file line by line. 
 	// Find orgs who raise red flags. 
-	function orgSanityCheck_Process( filecontents ){
+	function orgCheck_Process( filecontents ){
 
 		var withoutDescriptions = [];
 		var withoutHomepages = [];
@@ -472,7 +522,7 @@
 	}
 
 	document.getElementById('org-input').onchange = function(){
-		orgSanityCheck_Upload(this.files[0]);
+		orgCheck_Upload(this.files[0]);
 		this.value = "";
 	};
 
