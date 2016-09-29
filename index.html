@@ -146,6 +146,14 @@
 			</div>
 			<div id="org-output" class="output"></div>
 		</div>
+		<div class="tool-wrapper">
+			<h2>Run checks on Collection-export.json</h2>  
+			<div class="download-input-wrapper">
+				<a class="download-link" href="https://ir.library.carleton.ca/col/manage" target="_blank">Download from Artudis</a>
+				<input id="col-input" type="file" accept=".json">
+			</div>
+			<div id="col-output" class="output"></div>
+		</div>
 	</div>
 	<footer>
 		A project by Carleton University Library. <a href="https://github.com/artudis-utils/dashboard">Github Repo</a>
@@ -163,7 +171,78 @@
 		outputdiv.appendChild(header);
 
 		outputdiv.appendChild(list);        
-	}       
+	}  
+
+	// Build a link to an object
+	function buildAnchor( object, linkcode){
+		var baseURL = document.getElementById('baseURL').value;
+		var a = document.createElement('a');
+		a.textContent = object['name'];          
+		a.setAttribute('href', baseURL + "/"+ linkcode +"/" + object['__id__']);
+		a.setAttribute('target', '_blank');
+		return a;
+	}     
+	
+	// Build a ul element from an array of objects
+	function buildList( objects, comparefunc, linkcode, labels=false ){
+
+		objects.sort(comparefunc);
+
+		var list = document.createElement('ul');
+
+		for (var i = 0; i < objects.length; i++) {
+			var object = objects[i];
+			var li = document.createElement('li');
+			li.appendChild(buildAnchor(object, linkcode));
+			if (labels === true && typeof object['labels'] !== 'undefined' ) {
+				var label = document.createElement('span');
+				for (var j = 0; j < object['labels'].length; j++){
+					label.textContent += object['labels'][j] + " ";
+				}
+				li.appendChild(label);
+			}
+			list.appendChild(li);
+		}   
+		return list;
+	}
+
+	// Add an object to a map. 
+	// If the object name key isn't in the map, 
+	// create new array of one object. 
+	// If the object name key is in the map, 
+	// push the object to the existing array. 
+	function addToMap(object, map){
+		if (object['name'] in map){
+			map[object['name']].push(object);
+		} else {
+			map[object['name']] = [object];
+		}
+	}
+
+	// Build a ul element from an object of duplicate objects
+	function buildDuplicateList( duplicates, linkcode ){
+
+		var list = document.createElement('ul');
+
+		for (var name in duplicates) {
+
+			var objectsWithDuplicateNames = duplicates[name];
+
+			if (objectsWithDuplicateNames.length >= 2) {
+				var item = document.createElement('li');
+				var sublist = document.createElement('ul');	
+				for (var i = 0; i < objectsWithDuplicateNames.length; i++) {
+					var object = objectsWithDuplicateNames[i];
+					var li = document.createElement('li');
+					li.appendChild(buildAnchor(object, linkcode));
+					sublist.appendChild(li);
+				}				
+				item.appendChild(sublist);
+				list.appendChild(item);
+			}			
+		}   
+		return list;
+	}
 
 	document.getElementById('baseURL').onchange = function(){
 		var links = document.getElementsByClassName('download-link');
@@ -188,70 +267,7 @@
 		if (one['given_name'] > two['given_name'])
 			return 1;
 		return 0;
-	}
-
-	// Build a ul element from an array of People
-	function buildPeopleList( people, labels=false ){
-
-		people.sort(comparepeople);
-
-		var peoplelist = document.createElement('ul');
-
-		for (var i = 0; i < people.length; i++) {
-			var person = people[i];
-			var baseURL = document.getElementById('baseURL').value;
-
-			var personli = document.createElement('li');
-			var persona = document.createElement('a');
-			persona.textContent = person['family_name'] + ", " + person['given_name'];          
-			persona.setAttribute('href', baseURL + "/ppl/" + person['__id__']);
-			persona.setAttribute('target', '_blank');
-			personli.appendChild(persona);
-
-			if (labels === true && typeof person['labels'] !== 'undefined' ) {
-				var personlabel = document.createElement('span');
-				for (var j = 0; j < person['labels'].length; j++){
-					personlabel.textContent += person['labels'][j] + " ";
-				}
-				personli.appendChild(personlabel);
-			}
-			peoplelist.appendChild(personli);
-		}   
-
-		return peoplelist;
-	}
-
-	// Build a ul element from an object of duplicate People
-	function buildDuplicatePeopleList( peopleDuplicates ){
-
-		var duplicatelist = document.createElement('ul');
-
-		for (var name in peopleDuplicates) {
-
-			var peopleWithDuplicateNames = peopleDuplicates[name];
-
-			var duplcateitem = document.createElement('li');
-			var duplicatesublist = document.createElement('ul');
-
-			for (var i = 0; i < peopleWithDuplicateNames.length; i++) {
-				var person = peopleWithDuplicateNames[i];
-				var personli = document.createElement('li');
-				var baseURL = document.getElementById('baseURL').value;
-				var persona = document.createElement('a');
-	
-				persona.textContent = person['family_name'] + ", " + person['given_name'] + " (" + person['__id__'] + ")";          
-				persona.setAttribute('href', baseURL + "/ppl/" + person['__id__']);
-				persona.setAttribute('target', '_blank');
-				personli.appendChild(persona);
-				duplicatesublist.appendChild(personli);
-			}			
-			
-			duplcateitem.appendChild(duplicatesublist);
-			duplicatelist.appendChild(duplcateitem);
-		}   
-
-		return duplicatelist;
-	}
+	}		
 
 	// Load in the local file using a FileReader. 
 	function personCheck_Upload( file ){
@@ -276,7 +292,7 @@
 		var withoutNameVariant = [];
 		var withDuplicateIdentifiers = [];
 
-		var peopleDuplicates = {};
+		var processed = {};
 
 		var filelines = filecontents.split("\n");
 		for (var i = 0; i < filelines.length; i++) {
@@ -289,6 +305,7 @@
 			}
 
 			var person = JSON.parse(line);
+			person['name'] = person['family_name'] + ", " + person['given_name'];
 
 			// Instead of whitelisting, we add everyone to the blacklist,
 			// then remove people who meet the criteria. 
@@ -353,47 +370,42 @@
 				withDuplicateIdentifiers.push(person);
 			}
 
-			// Duplicate Names
-			var name = person['given_name'] + " " + person['family_name'];
-			if (name in peopleDuplicates){
-				peopleDuplicates[name].push(person);
-			} else {
-				peopleDuplicates[name] = [person];
-			}
+			addToMap(person, processed);
 
 		}
 	
 		addOutput("person-output", 
 					"People without a Work Website Contact → " + withoutWorkURL.length, 
-					buildPeopleList(withoutWorkURL));
+					buildList(withoutWorkURL, comparepeople, 'ppl'));
 
 		addOutput("person-output", 
 					"People without an Identifier → " + withoutIdentifiers.length, 
-					buildPeopleList(withoutIdentifiers));
+					buildList(withoutIdentifiers, comparepeople, 'ppl'));
 
 		addOutput("person-output", 
 					"People without an Employer Affiliation → " + withoutEmployer.length, 
-					buildPeopleList(withoutEmployer));
+					buildList(withoutEmployer, comparepeople, 'ppl'));
 
 		if (document.getElementById("person_nonamevariant").checked){
 			addOutput("person-output", 
 					"People without an Alternative Name → " + withoutNameVariant.length, 
-					buildPeopleList(withoutNameVariant));
+					buildList(withoutNameVariant, comparepeople, 'ppl'));
 		}
 
 		addOutput("person-output", 
 					"People with Duplicate Identifier Schemes → " + withDuplicateIdentifiers.length, 
-					buildPeopleList(withDuplicateIdentifiers, true));
+					buildList(withDuplicateIdentifiers, comparepeople, 'ppl', true));
 
-		for (var name in peopleDuplicates) {
- 			if (peopleDuplicates[name].length < 2 ){
- 				delete peopleDuplicates[name];
- 			}
+		var duplicates = 0;
+		for (var name in processed) {
+			if (processed[name].length >= 2){
+				duplicates++;
+			}
 		}
 
 		addOutput("person-output", 
-					"Same Name Multiple People → " + Object.keys(peopleDuplicates).length, 
-					buildDuplicatePeopleList(peopleDuplicates));
+					"Same Name Multiple People → " + duplicates, 
+					buildDuplicateList(processed, 'ppl'));
 
 	}   
 
@@ -411,31 +423,7 @@
 		if (one['name'] > two['name'])
 			return 1;
 		return 0;
-	}
-
-	// Build a ul element from an array of Orgs
-	function buildOrgList( orgs ){
-
-		orgs.sort(compareorgs);
-
-		var orglist = document.createElement('ul');
-
-		for (var i = 0; i < orgs.length; i++) {
-			var org = orgs[i];
-			var baseURL = document.getElementById('baseURL').value;
-
-			var orgli = document.createElement('li');
-			var orga = document.createElement('a');
-			orga.textContent = org['name'];     
-			orga.setAttribute('href', baseURL + "/org/" + org['__id__']);
-			orga.setAttribute('target', '_blank');
-			orgli.appendChild(orga);
-		   
-			orglist.appendChild(orgli);
-		}   
-
-		return orglist;
-	}
+	}	
 
 	// Load in the local file using a FileReader. 
 	function orgCheck_Upload( file ){
@@ -457,6 +445,8 @@
 		var withoutDescriptions = [];
 		var withoutHomepages = [];
 		var withoutRelation = [];
+
+		var processed = {};
 
 		var filelines = filecontents.split("\n");
 		for (var i = 0; i < filelines.length; i++) {
@@ -503,26 +493,94 @@
 				withoutRelation.pop();
 			}
 
+			addToMap(org, processed);
 
 		}
 		
 		addOutput("org-output", 
 					"Organizations without a description → " + withoutDescriptions.length, 
-					buildOrgList(withoutDescriptions));
+					buildList(withoutDescriptions, compareorgs, 'org'));
 
 		addOutput("org-output", 
 					"Organizations without a website contact → " + withoutHomepages.length, 
-					buildOrgList(withoutHomepages));
+					buildList(withoutHomepages, compareorgs, 'org'));
 
 		addOutput("org-output", 
 					"Organizations without any relations → " + withoutRelation.length, 
-					buildOrgList(withoutRelation));
+					buildList(withoutRelation, compareorgs, 'org'));
+
+		var duplicates = 0;
+		for (var name in processed) {
+			if (processed[name].length >= 2){
+				duplicates++;
+			}
+		}
+
+		addOutput("org-output", 
+					"Same Name Multiple Organizations → " + duplicates, 
+					buildDuplicateList(processed, 'org'));
 
 
 	}
 
 	document.getElementById('org-input').onchange = function(){
 		orgCheck_Upload(this.files[0]);
+		this.value = "";
+	};
+
+	// ----- Collections -----
+
+
+	// Load in the local file using a FileReader. 
+	function colCheck_Upload( file ){
+
+		//Clear the old output
+		document.getElementById("col-output").innerHTML = "";
+
+		var reader = new FileReader();
+		reader.onload = function( event ) {  
+			colCheck_Process(event.target.result); 
+		}       
+		reader.readAsText(file);
+	}
+
+	// Process the contents of the JSON file line by line. 
+	// Find collections who raise red flags. 
+	function colCheck_Process( filecontents ){
+
+		var processed = {};
+
+		var filelines = filecontents.split("\n");
+		for (var i = 0; i < filelines.length; i++) {
+
+			var line = filelines[i];    
+
+			// If the line is empty, don't try to parse as JSON.
+			if (line.trim() == "") {
+				continue;
+			}
+
+			var collection = JSON.parse(line);
+			
+			addToMap(collection, processed);
+
+		}
+
+		var duplicates = 0;
+		for (var name in processed) {
+			if (processed[name].length >= 2){
+				duplicates++;
+			}
+		}
+
+		addOutput("col-output", 
+					"Same Name Multiple Collections → " + duplicates, 
+					buildDuplicateList(processed, 'col'));
+
+	}   
+
+	document.getElementById('col-input').onchange = function(){
+		colCheck_Upload(this.files[0]);
 		this.value = "";
 	};
 
