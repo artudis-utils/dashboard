@@ -110,6 +110,10 @@
 			text-align: center;
 		}
 
+		li {
+			margin-bottom: 0.5rem;
+		}
+
 
 	</style>
 </head>
@@ -182,9 +186,29 @@
 		a.setAttribute('target', '_blank');
 		return a;
 	}     
+
+	// Special case - build a link with a canned orcid search
+	function buildAnchorWithOrcid( object, linkcode){
+		var baseURL = document.getElementById('baseURL').value;
+		var div = document.createElement('div');
+
+		var a = document.createElement('a');
+		a.textContent = object['name'];          
+		a.setAttribute('href', baseURL + "/"+ linkcode +"/" + object['__id__']);
+		a.setAttribute('target', '_blank');
+		div.appendChild(a);
+		div.appendChild(document.createElement('br'));
+
+		var orcid = document.createElement('a');
+		orcid.textContent = "Search ORCID";          
+		orcid.setAttribute('href', "https://orcid.org/orcid-search/quick-search?searchQuery=" + object['given_name'] + " " + object['family_name']);
+		orcid.setAttribute('target', '_blank');
+		div.appendChild(orcid);		
+		return div;
+	}   
 	
 	// Build a ul element from an array of objects
-	function buildList( objects, comparefunc, linkcode, labels=false ){
+	function buildList( objects, comparefunc, linkcode, labels=false, orcid=false ){
 
 		objects.sort(comparefunc);
 
@@ -193,7 +217,11 @@
 		for (var i = 0; i < objects.length; i++) {
 			var object = objects[i];
 			var li = document.createElement('li');
-			li.appendChild(buildAnchor(object, linkcode));
+			if (orcid){
+				li.appendChild(buildAnchorWithOrcid(object, linkcode));	
+			} else {
+				li.appendChild(buildAnchor(object, linkcode));				
+			}
 			if (labels === true && typeof object['labels'] !== 'undefined' ) {
 				var label = document.createElement('span');
 				for (var j = 0; j < object['labels'].length; j++){
@@ -247,7 +275,6 @@
 	document.getElementById('baseURL').onchange = function(){
 		var links = document.getElementsByClassName('download-link');
 		for (var i = 0; i < links.length; i++) {
-			console.log(links[i].getAttribute('href'))
 			links[i].setAttribute('href', 
 				links[i].getAttribute('href').replace(
 					new RegExp("^https?://[a-zA-Z\.]*/"), this.value + "/"));
@@ -291,6 +318,7 @@
 		var withoutEmployer = [];
 		var withoutNameVariant = [];
 		var withDuplicateIdentifiers = [];
+		var withoutORCID = [];
 
 		var processed = {};
 
@@ -370,8 +398,19 @@
 				withDuplicateIdentifiers.push(person);
 			}
 
-			addToMap(person, processed);
+			// No ORCID
+			withoutORCID.push(person);
+			if (typeof person['identifier'] !== 'undefined' && person['identifier'].length > 0) {
+				for (var j = 0; j < person['identifier'].length; j++){ 
+					var scheme = person['identifier'][j]['scheme'];
+					if (scheme == "orcid" ){
+						withoutORCID.pop();
+						break;
+					}
+				}
+			}
 
+			addToMap(person, processed);
 		}
 	
 		addOutput("person-output", 
@@ -395,6 +434,10 @@
 		addOutput("person-output", 
 					"People with Duplicate Identifier Schemes → " + withDuplicateIdentifiers.length, 
 					buildList(withDuplicateIdentifiers, comparepeople, 'ppl', true));
+
+		addOutput("person-output", 
+					"People without an ORCID → " + withoutORCID.length, 
+					buildList(withoutORCID, comparepeople, 'ppl', false, true));
 
 		var duplicates = 0;
 		for (var name in processed) {
@@ -494,7 +537,6 @@
 			}
 
 			addToMap(org, processed);
-
 		}
 		
 		addOutput("org-output", 
@@ -519,8 +561,6 @@
 		addOutput("org-output", 
 					"Same Name Multiple Organizations → " + duplicates, 
 					buildDuplicateList(processed, 'org'));
-
-
 	}
 
 	document.getElementById('org-input').onchange = function(){
@@ -529,7 +569,6 @@
 	};
 
 	// ----- Collections -----
-
 
 	// Load in the local file using a FileReader. 
 	function colCheck_Upload( file ){
@@ -560,10 +599,8 @@
 				continue;
 			}
 
-			var collection = JSON.parse(line);
-			
+			var collection = JSON.parse(line);			
 			addToMap(collection, processed);
-
 		}
 
 		var duplicates = 0;
