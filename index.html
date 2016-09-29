@@ -135,6 +135,8 @@
 			<div class="checkbox-group">
 				<label for="person_nonamevariant">Include 'No Name Variant' Check</label>
 				<input type="checkbox" id="person_nonamevariant" name="person_nonamevariant">
+				<label for="person_noorcid">Include 'No ORCID' Check</label>
+				<input type="checkbox" id="person_noorcid" name="person_noorcid">
 			</div> 
 			<div class="download-input-wrapper">
 				<a class="download-link" href="https://ir.library.carleton.ca/ppl/manage" target="_blank">Download from Artudis</a>
@@ -435,9 +437,11 @@
 					"People with Duplicate Identifier Schemes → " + withDuplicateIdentifiers.length, 
 					buildList(withDuplicateIdentifiers, comparepeople, 'ppl', true));
 
-		addOutput("person-output", 
-					"People without an ORCID → " + withoutORCID.length, 
-					buildList(withoutORCID, comparepeople, 'ppl', false, true));
+		if (document.getElementById("person_noorcid").checked){
+			addOutput("person-output", 
+						"People without an ORCID → " + withoutORCID.length, 
+						buildList(withoutORCID, comparepeople, 'ppl', false, true));
+		}
 
 		var duplicates = 0;
 		for (var name in processed) {
