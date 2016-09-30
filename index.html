@@ -211,7 +211,6 @@
 	
 	// Build a ul element from an array of objects
 	function buildList( objects, comparefunc, linkcode, labels=false, orcid=false ){
-
 		objects.sort(comparefunc);
 
 		var list = document.createElement('ul');
@@ -251,7 +250,6 @@
 
 	// Build a ul element from an object of duplicate objects
 	function buildDuplicateList( duplicates, linkcode ){
-
 		var list = document.createElement('ul');
 
 		for (var name in duplicates) {
@@ -492,6 +490,7 @@
 		var withoutDescriptions = [];
 		var withoutHomepages = [];
 		var withoutRelation = [];
+		var withDuplicateIdentifiers = [];
 
 		var processed = {};
 
@@ -540,6 +539,24 @@
 				withoutRelation.pop();
 			}
 
+			// Duplicate Identifiers
+			org['labels'] = [];
+			if (typeof org['identifier'] !== 'undefined' && org['identifier'].length > 0) {
+				var listOfSchemes = [];
+				for (var j = 0; j < org['identifier'].length; j++){ 
+					var scheme = org['identifier'][j]['scheme'];
+					if (listOfSchemes.indexOf(scheme) > -1 && org['labels'].indexOf(scheme) === -1){
+						org['labels'].push(scheme);
+					} else {
+						listOfSchemes.push(scheme);
+					}
+
+				}
+			}
+			if (org['labels'].length > 0){
+				withDuplicateIdentifiers.push(org);
+			}
+
 			addToMap(org, processed);
 		}
 		
@@ -554,6 +571,10 @@
 		addOutput("org-output", 
 					"Organizations without any relations → " + withoutRelation.length, 
 					buildList(withoutRelation, compareorgs, 'org'));
+
+		addOutput("org-output", 
+					"Organizations with Duplicate Identifier Schemes → " + withDuplicateIdentifiers.length, 
+					buildList(withDuplicateIdentifiers, compareorgs, 'org', true));
 
 		var duplicates = 0;
 		for (var name in processed) {
