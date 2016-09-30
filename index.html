@@ -263,6 +263,9 @@
 					var object = objectsWithDuplicateNames[i];
 					var li = document.createElement('li');
 					li.appendChild(buildAnchor(object, linkcode));
+					var span = document.createElement('span');
+					span.textContent = "("+object['__id__']+")";
+					li.appendChild(span);
 					sublist.appendChild(li);
 				}				
 				item.appendChild(sublist);
