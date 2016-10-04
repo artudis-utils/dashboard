@@ -165,6 +165,14 @@
 			</div>
 			<div id="col-output" class="output"></div>
 		</div>
+		<div class="tool-wrapper">
+			<h2>Run checks on Publication-export.json</h2>  
+			<div class="download-input-wrapper">
+				<a class="download-link" href="https://ir.library.carleton.ca/pub/manage" target="_blank">Download from Artudis</a>
+				<input id="pub-input" type="file" accept=".json">
+			</div>
+			<div id="pub-output" class="output"></div>
+		</div>
 	</div>
 	<footer>
 		A project by Carleton University Library. <a href="https://github.com/artudis-utils/dashboard">Github Repo</a>
@@ -241,15 +249,36 @@
 	}
 
 	// Add an object to a map. 
-	// If the object name key isn't in the map, 
+	// If the object name isn't in the map, 
 	// create new array of one object. 
-	// If the object name key is in the map, 
+	// If the object name is in the map, 
 	// push the object to the existing array. 
-	function addToMap(object, map){
+	function addToNameMap(object, map){
 		if (object['name'] in map){
 			map[object['name']].push(object);
 		} else {
 			map[object['name']] = [object];
+		}
+	}
+		
+	// Add an object to a map. 
+	// If the object DOI isn't in the map, 
+	// create new array of one object. 
+	// If the object DOI is in the map, 
+	// push the object to the existing array. 
+	function addToDOIMap(object, map){
+		if (typeof object['identifier'] !== 'undefined' && object['identifier'].length > 0) {			
+			for (var j = 0; j < object['identifier'].length; j++){ 
+				var scheme = object['identifier'][j]['scheme'];
+				if (scheme === 'doi'){
+					var doi = object['identifier'][j]['value'];
+					if (doi in map){
+						map[doi].push(object);
+					} else {
+						map[doi] = [object];
+					}
+				}
+			}
 		}
 	}
 
@@ -418,7 +447,7 @@
 				}
 			}
 
-			addToMap(person, processed);
+			addToNameMap(person, processed);
 		}
 	
 		addOutput("person-output", 
@@ -492,7 +521,7 @@
 	}
 
 	// Process the contents of the JSON file line by line. 
-	// Find orgs who raise red flags. 
+	// Find orgs which raise red flags. 
 	function orgCheck_Process( filecontents ){
 
 		var withoutDescriptions = [];
@@ -565,7 +594,7 @@
 				withDuplicateIdentifiers.push(org);
 			}
 
-			addToMap(org, processed);
+			addToNameMap(org, processed);
 		}
 		
 		addOutput("org-output", 
@@ -617,7 +646,7 @@
 	}
 
 	// Process the contents of the JSON file line by line. 
-	// Find collections who raise red flags. 
+	// Find collections which raise red flags. 
 	function colCheck_Process( filecontents ){
 
 		var processed = {};
@@ -633,7 +662,7 @@
 			}
 
 			var collection = JSON.parse(line);			
-			addToMap(collection, processed);
+			addToNameMap(collection, processed);
 		}
 
 		var duplicates = 0;
@@ -651,6 +680,63 @@
 
 	document.getElementById('col-input').onchange = function(){
 		colCheck_Upload(this.files[0]);
+		this.value = "";
+	};
+
+	// ----- Publications -----
+
+	// Load in the local file using a FileReader. 
+	function pubCheck_Upload( file ){
+
+		//Clear the old output
+		document.getElementById("pub-output").innerHTML = "";
+
+		var reader = new FileReader();
+		reader.onload = function( event ) {  
+			pubCheck_Process(event.target.result); 
+		}       
+		reader.readAsText(file);
+	}
+
+	// Process the contents of the JSON file line by line. 
+	// Find publications that raise red flags. 
+	function pubCheck_Process( filecontents ){
+
+		var processed = {};
+
+		var filelines = filecontents.split("\n");
+		for (var i = 0; i < filelines.length; i++) {
+
+			var line = filelines[i];    
+
+			// If the line is empty, don't try to parse as JSON.
+			if (line.trim() == "") {
+				continue;
+			}
+
+			var publication = JSON.parse(line);		
+			publication['name'] = publication['title'];	
+			if (publication['name'].length > 50){
+				publication['name'] = publication['name'].substring(0, 50) + "...";
+			}
+			addToDOIMap(publication, processed);
+		}
+
+		var duplicates = 0;
+		for (var name in processed) {
+			if (processed[name].length >= 2){
+				duplicates++;
+			}
+		}
+
+		addOutput("pub-output", 
+					"Same DOI Multiple Publications → " + duplicates, 
+					buildDuplicateList(processed, 'pub'));
+
+	}   
+
+	document.getElementById('pub-input').onchange = function(){
+		pubCheck_Upload(this.files[0]);
 		this.value = "";
 	};
 
