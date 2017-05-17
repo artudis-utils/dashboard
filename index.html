@@ -356,6 +356,7 @@
 		var withoutNameVariant = [];
 		var withDuplicateIdentifiers = [];
 		var withoutORCID = [];
+		var withExposureNoLink = [];
 
 		var processed = {};
 
@@ -372,8 +373,7 @@
 			var person = JSON.parse(line);
 			person['name'] = person['family_name'] + ", " + person['given_name'];
 
-			// Instead of whitelisting, we add everyone to the blacklist,
-			// then remove people who meet the criteria. 
+			// Usually, we add everyone to a blacklist then remove people who meet the criteria. 
 
 			// Work URLS
 			withoutWorkURL.push(person);
@@ -418,6 +418,7 @@
 			}
 
 			// Duplicate Identifiers
+			// In this case, we only add the person if there are duplicate identifiers. 
 			person['labels'] = [];
 			if (typeof person['identifier'] !== 'undefined' && person['identifier'].length > 0) {
 				var listOfSchemes = [];
@@ -444,6 +445,24 @@
 						withoutORCID.pop();
 						break;
 					}
+				}
+			}
+
+			// Exposure without Link to Achievement or Organisation 
+			// In this case, we only add the person if they have exposure without a link to another entity. 
+			if (typeof person['exposure'] !== 'undefined' && person['exposure'].length > 0) {
+				for (var j = 0; j < person['exposure'].length; j++){ 
+					var exposure = person['exposure'][j];
+					if (typeof exposure['achievement'] !== 'string' && typeof exposure['organisation'] !== 'string'){
+						withExposureNoLink.push(person);
+						break;
+					} else if (typeof exposure['achievement'] === 'string' && exposure['achievement'].charAt(0) !== "@" ) {
+						withExposureNoLink.push(person);
+						break;
+					} else if (typeof exposure['organisation'] === 'string' && exposure['organisation'].charAt(0) !== "@" ) {
+						withExposureNoLink.push(person);
+						break;
+					} 
 				}
 			}
 
@@ -477,6 +496,10 @@
 						"People without an ORCID → " + withoutORCID.length, 
 						buildList(withoutORCID, comparepeople, 'ppl', false, true));
 		}
+
+		addOutput("person-output", 
+					"People with Exposures that don't link to an Org or Achievement → " + withExposureNoLink.length, 
+					buildList(withExposureNoLink, comparepeople, 'ppl'));
 
 		var duplicates = 0;
 		for (var name in processed) {
