@@ -453,13 +453,18 @@
 			if (typeof person['exposure'] !== 'undefined' && person['exposure'].length > 0) {
 				for (var j = 0; j < person['exposure'].length; j++){ 
 					var exposure = person['exposure'][j];
-					if (typeof exposure['achievement'] !== 'string' && typeof exposure['organisation'] !== 'string'){
+					if (typeof exposure['achievement'] !== 'string' 
+						&& typeof exposure['organisation'] !== 'string'
+						&& typeof exposure['event'] !== 'string') {
 						withExposureNoLink.push(person);
 						break;
 					} else if (typeof exposure['achievement'] === 'string' && exposure['achievement'].charAt(0) !== "@" ) {
 						withExposureNoLink.push(person);
 						break;
 					} else if (typeof exposure['organisation'] === 'string' && exposure['organisation'].charAt(0) !== "@" ) {
+						withExposureNoLink.push(person);
+						break;
+					} else if (typeof exposure['event'] === 'string' && exposure['event'].charAt(0) !== "@" ) {
 						withExposureNoLink.push(person);
 						break;
 					} 
@@ -498,7 +503,7 @@
 		}
 
 		addOutput("person-output", 
-					"People with Exposures that don't link to an Org or Achievement → " + withExposureNoLink.length, 
+					"People with Exposures that don't link to an Org, Event, or Achievement → " + withExposureNoLink.length, 
 					buildList(withExposureNoLink, comparepeople, 'ppl'));
 
 		var duplicates = 0;
