@@ -223,8 +223,11 @@
 	}   
 	
 	// Build a ul element from an array of objects
-	function buildList( objects, comparefunc, linkcode, labels=false, orcid=false ){
-		objects.sort(comparefunc);
+	function buildList( objects, linkcode, comparefunc, labels=false, orcid=false ){
+	
+		if(comparefunc != null){
+			objects.sort(comparefunc);
+		}
 
 		var list = document.createElement('ul');
 
@@ -308,6 +311,7 @@
 		}   
 		return list;
 	}
+	
 
 	document.getElementById('baseURL').onchange = function(){
 		var links = document.getElementsByClassName('download-link');
@@ -713,6 +717,17 @@
 
 	// ----- Publications -----
 
+	
+	// Compare publications for sorting 
+	function comparepubs(one,two) {
+		if (one['type'] < two['type'])
+			return -1;
+		if (one['type'] > two['type'])
+			return 1;
+		return 0;
+	}
+	
+	
 	// Load in the local file using a FileReader. 
 	function pubCheck_Upload( file ){
 
@@ -727,41 +742,108 @@
 	}
 
 	// Process the contents of the JSON file line by line. 
-	// Find publications that raise red flags. 
-	function pubCheck_Process( filecontents ){
-
-		var processed = {};
-
-		var filelines = filecontents.split("\n");
-		for (var i = 0; i < filelines.length; i++) {
-
-			var line = filelines[i];    
-
-			// If the line is empty, don't try to parse as JSON.
-			if (line.trim() == "") {
-				continue;
-			}
-
-			var publication = JSON.parse(line);		
-			publication['name'] = publication['title'];	
-			if (publication['name'].length > 50){
-				publication['name'] = publication['name'].substring(0, 50) + "...";
-			}
-			addToDOIMap(publication, processed);
+// Find publications that raise red flags. 
+function pubCheck_Process( filecontents ){
+	
+	var processed = {};
+	var processedCheckBook = {};
+	
+	//store type book w/o identifier scheme
+	var books = [];
+	//store type book w/o attachment of type 'borrow'
+	var booksA = [];
+	
+	var filelines = filecontents.split("\n");
+	
+	for (var i = 0; i < filelines.length; i++) {
+		
+		var line = filelines[i];    
+		
+		// If the line is empty, don't try to parse as JSON.
+		if (line.trim() == "") {
+			continue;
 		}
-
-		var duplicates = 0;
-		for (var name in processed) {
-			if (processed[name].length >= 2){
-				duplicates++;
-			}
+		
+		var publication = JSON.parse(line);
+		var publicationBooks = JSON.parse(line);
+		
+		// manipulations on publications of type book
+		
+		//blacklist for books
+		booksA.push(publicationBooks);
+		
+		//locate type book
+		if (publicationBooks['type'] === 'book' && publicationBooks['type'] !== 'undefined'){
+				
+				//once located check if the scheme is not equal to isbn
+				if(publicationBooks['identifier'][0]['scheme'] !== 'isbn' && publicationBooks['identifier'][0]['scheme'] !== 'undefined'){
+					//if condition is true, push the object onto the array
+					books.push(publicationBooks);
+				}
 		}
-
-		addOutput("pub-output", 
-					"Same DOI Multiple Publications → " + duplicates, 
-					buildDuplicateList(processed, 'pub'));
-
-	}   
+		
+		if (publicationBooks['type'] === 'book' && publicationBooks['type'] !== 'undefined'){
+				//once located check if the attachment is type borrow
+				for(var j = 0; j < publicationBooks['attachment'].length; j++){
+					if(publicationBooks['attachment'][j]['type'] === 'borrow' && publicationBooks['attachment'][j]['type'] !== 'undefined'){
+						//if condition is true, pop the object off the array
+						booksA.pop();
+						break;
+					}
+				}
+				
+		}
+		
+		// This stores a concatinated title in the 'name' key of the publication. 
+		publication['name'] = publication['title'];	
+		if (publication['name'].length > 50){
+			publication['name'] = publication['name'].substring(0, 50) + "...";
+		}		
+		
+		// Add the publication to the 'processed' map under its DOI.
+		// A DOI is a unique URL (web address) for that publication.
+		addToDOIMap(publication, processed);
+		
+		addToNameMap(publicationBooks, processedCheckBook);
+	}
+	
+	
+	addOutput("pub-output", 
+				"Number of type books with no identifier of scheme isbn → " + books.length, 
+				buildList(books, comparepubs, 'pub'));
+				
+	addOutput("pub-output", 
+				"Number of type books with no attachment of type borrow → " + booksA.length, 
+				buildList(booksA, comparepubs, 'pub'));
+	
+	// At this point, we have a map called processed that looks like:
+	// processed[" A DOI HERE "] -> [ A PUB ]
+	// or 
+	// processed[" A DOI HERE "] -> [ A PUB, ANOTHER PUB ]
+	//
+   	// processed["http://dx.doi.org/10.97/EDE.0000000000000636"][0] =
+    	// Object {refereed: "false", __kind__: "Publication", identifier: Array(2), description: Array(1), language: "en"…}	
+	
+	// We want to know how many DOIs list multiple publications. 
+	// If the length of the array under a DOI is greater than or equal to 2, 
+	// Artudis has two publications with the same DOI. That's bad! DOIs should be
+	// unique. 
+	
+	// This little loop figures out how many duplicates we're dealing with. 
+	// That number is used in the header - Same DOI Multiple Publications → $duplicates 
+	var duplicates = 0;
+	for (var name in processed) {
+		if (processed[name].length >= 2){
+			duplicates++;
+		}
+	}
+	
+	// `duplicates` is used to build the header. 
+	// `buildDuplicateList()` actually builds the HTML list. 
+	addOutput("pub-output", 
+				"Same DOI Multiple Publications → " + duplicates, 
+				buildDuplicateList(processed, 'pub'));
+	}  
 
 	document.getElementById('pub-input').onchange = function(){
 		pubCheck_Upload(this.files[0]);
