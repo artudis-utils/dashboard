@@ -768,7 +768,8 @@
 
 				// Assume all books don't have identifiers of type ISBN.
 				bookWithoutIdentifierSchemeISBN.push(publication);
-
+			
+			
 				// TODO: pop() on pubs where there is an identifer of type ISBN. 
 				//  {
 				//	...
@@ -784,6 +785,15 @@
 				//   If it is, check that the value isn't empty. 
 				//     If if isn't, pop() the pub and break the for loop on identifiers. 
 
+				
+				for(var j = 0; j < publication['identifier'].length; j++){
+					if(publication['identifier'][j]['scheme'] === 'isbn' && publication['identifier'][j]['value'] !== 'undefined'){
+						bookWithoutIdentifierSchemeISBN.pop();
+						break;
+					}
+				}
+				
+				
 				// Assume all books don't have attachments of type borrow.
 				bookWithoutAttachmentTypeBorrow.push(publication);
 
@@ -802,6 +812,15 @@
 			    // }
 			    // For each object in the attachment array, see if the type is borrow. 
 			    //   If it is, pop() the pub and break the for look on attachments. 
+				
+				
+				for(var l = 0; l < publication['attachment'].length; l++){
+					if(publication['attachment'][l]['type'] === 'borrow'){
+						bookWithoutAttachmentTypeBorrow.pop();
+						break;
+					}
+				}
+				
 
 			}
 			
@@ -851,7 +870,7 @@
 					buildList(bookWithoutIdentifierSchemeISBN, comparepubs, 'pub'));
 
 		addOutput("pub-output", 
-					"Publications of type book with no ISBNs → " + bookWithoutAttachmentTypeBorrow.length, 
+					"Publications of type book with no Attachments of type borrow → " + bookWithoutAttachmentTypeBorrow.length, 
 					buildList(bookWithoutAttachmentTypeBorrow, comparepubs, 'pub'));
 		
 
