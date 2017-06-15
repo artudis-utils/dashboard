@@ -565,6 +565,7 @@
 		var withoutHomepages = [];
 		var withoutRelation = [];
 		var withDuplicateIdentifiers = [];
+		var withoutScopusOrgID = [];
 
 		var processed = {};
 
@@ -627,6 +628,18 @@
 
 				}
 			}
+
+			// Scopus IDs
+			withoutScopusOrgID.push(org);
+			if (checkNotUndefinedandLength(org, 'identifier') > 0){
+				for(var j = 0; j < org['identifier'].length; j++){
+					if(org['identifier'][j]['scheme'] === 'scopus' && org['identifier'][j]['value'] !== 'undefined'){
+						withoutScopusOrgID.pop();
+						break;
+					}
+				}
+			}
+
 			if (org['labels'].length > 0){
 				withDuplicateIdentifiers.push(org);
 			}
@@ -634,10 +647,6 @@
 			addToNameMap(org, processed);
 		}
 		
-		addOutput("org-output", 
-					"Organizations without a description → " + withoutDescriptions.length, 
-					buildList(withoutDescriptions, compareorgs, 'org'));
-
 		addOutput("org-output", 
 					"Organizations without a website contact → " + withoutHomepages.length, 
 					buildList(withoutHomepages, compareorgs, 'org'));
@@ -650,6 +659,10 @@
 					"Organizations with Duplicate Identifier Schemes → " + withDuplicateIdentifiers.length, 
 					buildList(withDuplicateIdentifiers, compareorgs, 'org', true));
 
+		addOutput("org-output", 
+					"Organizations without Scopus ID → " + withoutScopusOrgID.length, 
+					buildList(withoutScopusOrgID, compareorgs, 'org'));
+
 		var duplicates = 0;
 		for (var name in processed) {
 			if (processed[name].length >= 2){
@@ -660,6 +673,10 @@
 		addOutput("org-output", 
 					"Same Name Multiple Organizations → " + duplicates, 
 					buildDuplicateList(processed, 'org'));
+
+		addOutput("org-output", 
+					"Organizations without a description → " + withoutDescriptions.length, 
+					buildList(withoutDescriptions, compareorgs, 'org'));
 	}
 
 	document.getElementById('org-input').onchange = function(){
