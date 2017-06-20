@@ -867,11 +867,11 @@
 					buildDuplicateList(processed, 'pub'));
 
 		addOutput("pub-output", 
-					"Publications of type book with no ISBNs → " + bookWithoutIdentifierSchemeISBN.length, 
+					"Books with no ISBN Identifier → " + bookWithoutIdentifierSchemeISBN.length, 
 					buildList(bookWithoutIdentifierSchemeISBN, comparepubs, 'pub'));
 
 		addOutput("pub-output", 
-					"Publications of type book with no Attachments of type borrow → " + bookWithoutAttachmentTypeBorrow.length, 
+					"Books with no Attachment of type Borrow → " + bookWithoutAttachmentTypeBorrow.length, 
 					buildList(bookWithoutAttachmentTypeBorrow, comparepubs, 'pub'));
 		
 
