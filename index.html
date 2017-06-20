@@ -308,6 +308,13 @@
 		}   
 		return list;
 	}
+
+	function checkNotUndefinedandHasLength(object, key){
+		if (typeof object[key] !== 'undefined' && object[key].length > 0) {
+			return true;
+		}
+		return false;
+	}
 	
 
 	document.getElementById('baseURL').onchange = function(){
@@ -347,13 +354,6 @@
 		reader.readAsText(file);
 	}
 	
-	function checkNotUndefinedandLength(object, subject){
-		if (typeof object[subject] !== 'undefined' && object[subject].length > 0) {
-				return true;
-		}
-		return false;
-		}
-
 	// Process the contents of the JSON file line by line. 
 	// Find people who raise red flags. 
 	function personCheck_Process( filecontents ){
@@ -386,7 +386,7 @@
 			// Work URLS
 			
 			withoutWorkURL.push(person);
-			if (checkNotUndefinedandLength(person, 'contact')) {
+			if (checkNotUndefinedandHasLength(person, 'contact')) {
 				for (var j = 0; j < person['contact'].length; j++){ 
 					var contact = person['contact'][j];
 					if (contact['role'] == "work" && typeof contact['website'] === "string" && contact['website'].length > 1 ){
@@ -398,13 +398,13 @@
 
 			// Identifiers
 			withoutIdentifiers.push(person);    
-			if (checkNotUndefinedandLength(person, 'identifier')) {
+			if (checkNotUndefinedandHasLength(person, 'identifier')) {
 				withoutIdentifiers.pop()
 			}
 
 			// Employer
 			withoutEmployer.push(person);
-			if (checkNotUndefinedandLength(person, 'affiliation')) {
+			if (checkNotUndefinedandHasLength(person, 'affiliation')) {
 				for (var j = 0; j < person['affiliation'].length; j++){ 
 					var affiliation = person['affiliation'][j];
 					if (affiliation['role'] == "employer" ){
@@ -416,7 +416,7 @@
 
 			// Name Variant
 			withoutNameVariant.push(person);
-			if (checkNotUndefinedandLength(person, 'name_info')) {
+			if (checkNotUndefinedandHasLength(person, 'name_info')) {
 				for (var j = 0; j < person['name_info'].length; j++){ 
 					var nameinfo = person['name_info'][j];
 					if (nameinfo['type'] == "alternative" ){
@@ -429,7 +429,7 @@
 			// Duplicate Identifiers
 			// In this case, we only add the person if there are duplicate identifiers. 
 			person['labels'] = [];
-			if (checkNotUndefinedandLength(person, 'identifier')) {
+			if (checkNotUndefinedandHasLength(person, 'identifier')) {
 				var listOfSchemes = [];
 				for (var j = 0; j < person['identifier'].length; j++){ 
 					var scheme = person['identifier'][j]['scheme'];
@@ -447,7 +447,7 @@
 
 			// No ORCID
 			withoutORCID.push(person);
-			if (checkNotUndefinedandLength(person, 'identifier')) {
+			if (checkNotUndefinedandHasLength(person, 'identifier')) {
 				for (var j = 0; j < person['identifier'].length; j++){ 
 					var scheme = person['identifier'][j]['scheme'];
 					if (scheme == "orcid" ){
@@ -459,7 +459,7 @@
 
 			// Exposure without Link to Achievement or Organisation 
 			// In this case, we only add the person if they have exposure without a link to another entity. 
-			if (checkNotUndefinedandLength(person, 'exposure')) {
+			if (checkNotUndefinedandHasLength(person, 'exposure')) {
 				for (var j = 0; j < person['exposure'].length; j++){ 
 					var exposure = person['exposure'][j];
 					if (typeof exposure['achievement'] !== 'string' 
@@ -586,7 +586,7 @@
 
 			// Descriptions 
 			withoutDescriptions.push(org);
-			if (checkNotUndefinedandLength(org, 'description')) {
+			if (checkNotUndefinedandHasLength(org, 'description')) {
 				for (var j = 0; j < org['description'].length; j++){ 
 					var description = org['description'][j];
 					if (description['type'] == "description" && description['value'].length > 1 ){
@@ -598,7 +598,7 @@
 
 			// Homepages
 			withoutHomepages.push(org);
-			if (checkNotUndefinedandLength(org, 'contact')) {
+			if (checkNotUndefinedandHasLength(org, 'contact')) {
 				for (var j = 0; j < org['contact'].length; j++){ 
 					var contact = org['contact'][j];
 					if(contact.hasOwnProperty('website') && contact['website'] !== null && contact['website'].length > 1){
@@ -610,13 +610,13 @@
 
 			// Relation
 			withoutRelation.push(org);
-			if (checkNotUndefinedandLength(org, 'relation')){
+			if (checkNotUndefinedandHasLength(org, 'relation')){
 				withoutRelation.pop();
 			}
 
 			// Duplicate Identifiers
 			org['labels'] = [];
-			if (checkNotUndefinedandLength(org, 'identifier')) {
+			if (checkNotUndefinedandHasLength(org, 'identifier')) {
 				var listOfSchemes = [];
 				for (var j = 0; j < org['identifier'].length; j++){ 
 					var scheme = org['identifier'][j]['scheme'];
@@ -631,7 +631,7 @@
 
 			// Scopus IDs
 			withoutScopusOrgID.push(org);
-			if (checkNotUndefinedandLength(org, 'identifier')){
+			if (checkNotUndefinedandHasLength(org, 'identifier')){
 				for(var j = 0; j < org['identifier'].length; j++){
 					if(org['identifier'][j]['scheme'] === 'scopus' && org['identifier'][j]['value'] !== 'undefined'){
 						withoutScopusOrgID.pop();
