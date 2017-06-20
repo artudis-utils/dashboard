@@ -349,9 +349,9 @@
 	
 	function checkNotUndefinedandLength(object, subject){
 		if (typeof object[subject] !== 'undefined' && object[subject].length > 0) {
-				return 1;
+				return true;
 		}
-		return 0;
+		return false;
 		}
 
 	// Process the contents of the JSON file line by line. 
@@ -386,7 +386,7 @@
 			// Work URLS
 			
 			withoutWorkURL.push(person);
-			if (checkNotUndefinedandLength(person, 'contact') > 0) {
+			if (checkNotUndefinedandLength(person, 'contact')) {
 				for (var j = 0; j < person['contact'].length; j++){ 
 					var contact = person['contact'][j];
 					if (contact['role'] == "work" && typeof contact['website'] === "string" && contact['website'].length > 1 ){
@@ -398,13 +398,13 @@
 
 			// Identifiers
 			withoutIdentifiers.push(person);    
-			if (checkNotUndefinedandLength(person, 'identifier') > 0) {
+			if (checkNotUndefinedandLength(person, 'identifier')) {
 				withoutIdentifiers.pop()
 			}
 
 			// Employer
 			withoutEmployer.push(person);
-			if (checkNotUndefinedandLength(person, 'affiliation') > 0) {
+			if (checkNotUndefinedandLength(person, 'affiliation')) {
 				for (var j = 0; j < person['affiliation'].length; j++){ 
 					var affiliation = person['affiliation'][j];
 					if (affiliation['role'] == "employer" ){
@@ -416,7 +416,7 @@
 
 			// Name Variant
 			withoutNameVariant.push(person);
-			if (checkNotUndefinedandLength(person, 'name_info') > 0) {
+			if (checkNotUndefinedandLength(person, 'name_info')) {
 				for (var j = 0; j < person['name_info'].length; j++){ 
 					var nameinfo = person['name_info'][j];
 					if (nameinfo['type'] == "alternative" ){
@@ -429,7 +429,7 @@
 			// Duplicate Identifiers
 			// In this case, we only add the person if there are duplicate identifiers. 
 			person['labels'] = [];
-			if (checkNotUndefinedandLength(person, 'identifier') > 0) {
+			if (checkNotUndefinedandLength(person, 'identifier')) {
 				var listOfSchemes = [];
 				for (var j = 0; j < person['identifier'].length; j++){ 
 					var scheme = person['identifier'][j]['scheme'];
@@ -447,7 +447,7 @@
 
 			// No ORCID
 			withoutORCID.push(person);
-			if (checkNotUndefinedandLength(person, 'identifier') > 0) {
+			if (checkNotUndefinedandLength(person, 'identifier')) {
 				for (var j = 0; j < person['identifier'].length; j++){ 
 					var scheme = person['identifier'][j]['scheme'];
 					if (scheme == "orcid" ){
@@ -459,7 +459,7 @@
 
 			// Exposure without Link to Achievement or Organisation 
 			// In this case, we only add the person if they have exposure without a link to another entity. 
-			if (checkNotUndefinedandLength(person, 'exposure') > 0) {
+			if (checkNotUndefinedandLength(person, 'exposure')) {
 				for (var j = 0; j < person['exposure'].length; j++){ 
 					var exposure = person['exposure'][j];
 					if (typeof exposure['achievement'] !== 'string' 
@@ -586,7 +586,7 @@
 
 			// Descriptions 
 			withoutDescriptions.push(org);
-			if (checkNotUndefinedandLength(org, 'description') > 0) {
+			if (checkNotUndefinedandLength(org, 'description')) {
 				for (var j = 0; j < org['description'].length; j++){ 
 					var description = org['description'][j];
 					if (description['type'] == "description" && description['value'].length > 1 ){
@@ -598,7 +598,7 @@
 
 			// Homepages
 			withoutHomepages.push(org);
-			if (checkNotUndefinedandLength(org, 'contact') > 0) {
+			if (checkNotUndefinedandLength(org, 'contact')) {
 				for (var j = 0; j < org['contact'].length; j++){ 
 					var contact = org['contact'][j];
 					if(contact.hasOwnProperty('website') && contact['website'] !== null && contact['website'].length > 1){
@@ -610,13 +610,13 @@
 
 			// Relation
 			withoutRelation.push(org);
-			if (checkNotUndefinedandLength(org, 'relation') > 0){
+			if (checkNotUndefinedandLength(org, 'relation')){
 				withoutRelation.pop();
 			}
 
 			// Duplicate Identifiers
 			org['labels'] = [];
-			if (checkNotUndefinedandLength(org, 'identifier') > 0) {
+			if (checkNotUndefinedandLength(org, 'identifier')) {
 				var listOfSchemes = [];
 				for (var j = 0; j < org['identifier'].length; j++){ 
 					var scheme = org['identifier'][j]['scheme'];
@@ -631,7 +631,7 @@
 
 			// Scopus IDs
 			withoutScopusOrgID.push(org);
-			if (checkNotUndefinedandLength(org, 'identifier') > 0){
+			if (checkNotUndefinedandLength(org, 'identifier')){
 				for(var j = 0; j < org['identifier'].length; j++){
 					if(org['identifier'][j]['scheme'] === 'scopus' && org['identifier'][j]['value'] !== 'undefined'){
 						withoutScopusOrgID.pop();
@@ -795,17 +795,6 @@
 				bookWithoutIdentifierSchemeISBN.push(publication);
 			
 			
-				// TODO: pop() on pubs where there is an identifer of type ISBN. 
-				//  {
-				//	...
-				//  "identifier": [
-				//    {
-				//      "scheme": "isbn",
-				//      "value": "978-0-7735-0886-6"
-				//    }
-				//  ],
-				//  ...
-			    //  }
 				// For each object in the identifier array, see if the scheme is isbn. 
 				//   If it is, check that the value isn't empty. 
 				//     If if isn't, pop() the pub and break the for loop on identifiers. 
@@ -822,19 +811,6 @@
 				// Assume all books don't have attachments of type borrow.
 				bookWithoutAttachmentTypeBorrow.push(publication);
 
-				// TODO: pop() on pubs where they have an attachment of type borrow. 
-				// {
-				// ...
-				// "attachment": [
-   				//	  {
-   				//	    ...
-   				//	    "type": "borrow",
-   				//	    ...
-   				//	  },
-   				//    ...
-   				//  ],
-				// ...
-			    // }
 			    // For each object in the attachment array, see if the type is borrow. 
 			    //   If it is, pop() the pub and break the for look on attachments. 
 				
