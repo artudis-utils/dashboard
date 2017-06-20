@@ -308,6 +308,7 @@
 		}   
 		return list;
 	}
+	
 
 	document.getElementById('baseURL').onchange = function(){
 		var links = document.getElementsByClassName('download-link');
@@ -345,6 +346,13 @@
 		}       
 		reader.readAsText(file);
 	}
+	
+	function checkNotUndefinedandLength(object, subject){
+		if (typeof object[subject] !== 'undefined' && object[subject].length > 0) {
+				return true;
+		}
+		return false;
+		}
 
 	// Process the contents of the JSON file line by line. 
 	// Find people who raise red flags. 
@@ -376,8 +384,9 @@
 			// Usually, we add everyone to a blacklist then remove people who meet the criteria. 
 
 			// Work URLS
+			
 			withoutWorkURL.push(person);
-			if (typeof person['contact'] !== 'undefined' && person['contact'].length > 0) {
+			if (checkNotUndefinedandLength(person, 'contact')) {
 				for (var j = 0; j < person['contact'].length; j++){ 
 					var contact = person['contact'][j];
 					if (contact['role'] == "work" && typeof contact['website'] === "string" && contact['website'].length > 1 ){
@@ -389,13 +398,13 @@
 
 			// Identifiers
 			withoutIdentifiers.push(person);    
-			if (typeof person['identifier'] !== 'undefined' && person['identifier'].length > 0) {
+			if (checkNotUndefinedandLength(person, 'identifier')) {
 				withoutIdentifiers.pop()
 			}
 
 			// Employer
 			withoutEmployer.push(person);
-			if (typeof person['affiliation'] !== 'undefined' && person['affiliation'].length > 0) {
+			if (checkNotUndefinedandLength(person, 'affiliation')) {
 				for (var j = 0; j < person['affiliation'].length; j++){ 
 					var affiliation = person['affiliation'][j];
 					if (affiliation['role'] == "employer" ){
@@ -407,7 +416,7 @@
 
 			// Name Variant
 			withoutNameVariant.push(person);
-			if (typeof person['name_info'] !== 'undefined' && person['name_info'].length > 0) {
+			if (checkNotUndefinedandLength(person, 'name_info')) {
 				for (var j = 0; j < person['name_info'].length; j++){ 
 					var nameinfo = person['name_info'][j];
 					if (nameinfo['type'] == "alternative" ){
@@ -420,7 +429,7 @@
 			// Duplicate Identifiers
 			// In this case, we only add the person if there are duplicate identifiers. 
 			person['labels'] = [];
-			if (typeof person['identifier'] !== 'undefined' && person['identifier'].length > 0) {
+			if (checkNotUndefinedandLength(person, 'identifier')) {
 				var listOfSchemes = [];
 				for (var j = 0; j < person['identifier'].length; j++){ 
 					var scheme = person['identifier'][j]['scheme'];
@@ -438,7 +447,7 @@
 
 			// No ORCID
 			withoutORCID.push(person);
-			if (typeof person['identifier'] !== 'undefined' && person['identifier'].length > 0) {
+			if (checkNotUndefinedandLength(person, 'identifier')) {
 				for (var j = 0; j < person['identifier'].length; j++){ 
 					var scheme = person['identifier'][j]['scheme'];
 					if (scheme == "orcid" ){
@@ -450,7 +459,7 @@
 
 			// Exposure without Link to Achievement or Organisation 
 			// In this case, we only add the person if they have exposure without a link to another entity. 
-			if (typeof person['exposure'] !== 'undefined' && person['exposure'].length > 0) {
+			if (checkNotUndefinedandLength(person, 'exposure')) {
 				for (var j = 0; j < person['exposure'].length; j++){ 
 					var exposure = person['exposure'][j];
 					if (typeof exposure['achievement'] !== 'string' 
@@ -556,6 +565,7 @@
 		var withoutHomepages = [];
 		var withoutRelation = [];
 		var withDuplicateIdentifiers = [];
+		var withoutScopusOrgID = [];
 
 		var processed = {};
 
@@ -576,7 +586,7 @@
 
 			// Descriptions 
 			withoutDescriptions.push(org);
-			if (typeof org['description'] !== 'undefined' && org['description'].length > 0) {
+			if (checkNotUndefinedandLength(org, 'description')) {
 				for (var j = 0; j < org['description'].length; j++){ 
 					var description = org['description'][j];
 					if (description['type'] == "description" && description['value'].length > 1 ){
@@ -588,7 +598,7 @@
 
 			// Homepages
 			withoutHomepages.push(org);
-			if (typeof org['contact'] !== 'undefined' && org['contact'].length > 0) {
+			if (checkNotUndefinedandLength(org, 'contact')) {
 				for (var j = 0; j < org['contact'].length; j++){ 
 					var contact = org['contact'][j];
 					if(contact.hasOwnProperty('website') && contact['website'] !== null && contact['website'].length > 1){
@@ -600,13 +610,13 @@
 
 			// Relation
 			withoutRelation.push(org);
-			if (typeof org['relation'] !== 'undefined' && org['relation'].length > 0){
+			if (checkNotUndefinedandLength(org, 'relation')){
 				withoutRelation.pop();
 			}
 
 			// Duplicate Identifiers
 			org['labels'] = [];
-			if (typeof org['identifier'] !== 'undefined' && org['identifier'].length > 0) {
+			if (checkNotUndefinedandLength(org, 'identifier')) {
 				var listOfSchemes = [];
 				for (var j = 0; j < org['identifier'].length; j++){ 
 					var scheme = org['identifier'][j]['scheme'];
@@ -618,6 +628,18 @@
 
 				}
 			}
+
+			// Scopus IDs
+			withoutScopusOrgID.push(org);
+			if (checkNotUndefinedandLength(org, 'identifier')){
+				for(var j = 0; j < org['identifier'].length; j++){
+					if(org['identifier'][j]['scheme'] === 'scopus' && org['identifier'][j]['value'] !== 'undefined'){
+						withoutScopusOrgID.pop();
+						break;
+					}
+				}
+			}
+
 			if (org['labels'].length > 0){
 				withDuplicateIdentifiers.push(org);
 			}
@@ -625,10 +647,6 @@
 			addToNameMap(org, processed);
 		}
 		
-		addOutput("org-output", 
-					"Organizations without a description → " + withoutDescriptions.length, 
-					buildList(withoutDescriptions, compareorgs, 'org'));
-
 		addOutput("org-output", 
 					"Organizations without a website contact → " + withoutHomepages.length, 
 					buildList(withoutHomepages, compareorgs, 'org'));
@@ -641,6 +659,10 @@
 					"Organizations with Duplicate Identifier Schemes → " + withDuplicateIdentifiers.length, 
 					buildList(withDuplicateIdentifiers, compareorgs, 'org', true));
 
+		addOutput("org-output", 
+					"Organizations without Scopus ID → " + withoutScopusOrgID.length, 
+					buildList(withoutScopusOrgID, compareorgs, 'org'));
+
 		var duplicates = 0;
 		for (var name in processed) {
 			if (processed[name].length >= 2){
@@ -651,6 +673,10 @@
 		addOutput("org-output", 
 					"Same Name Multiple Organizations → " + duplicates, 
 					buildDuplicateList(processed, 'org'));
+
+		addOutput("org-output", 
+					"Organizations without a description → " + withoutDescriptions.length, 
+					buildList(withoutDescriptions, compareorgs, 'org'));
 	}
 
 	document.getElementById('org-input').onchange = function(){
@@ -713,6 +739,17 @@
 
 	// ----- Publications -----
 
+	
+	// Compare publications for sorting 
+	function comparepubs(one,two) {
+		if (one['title'] < two['title'])
+			return -1;
+		if (one['title'] > two['title'])
+			return 1;
+		return 0;
+	}
+	
+	
 	// Load in the local file using a FileReader. 
 	function pubCheck_Upload( file ){
 
@@ -729,44 +766,122 @@
 	// Process the contents of the JSON file line by line. 
 	// Find publications that raise red flags. 
 	function pubCheck_Process( filecontents ){
-
+	
 		var processed = {};
+		
+		//store type book w/o identifier with scheme ISBN
+		var bookWithoutIdentifierSchemeISBN = [];
 
+		//store type book w/o attachment of type 'borrow'
+		var bookWithoutAttachmentTypeBorrow = [];
+		
 		var filelines = filecontents.split("\n");
+		
 		for (var i = 0; i < filelines.length; i++) {
-
+		
 			var line = filelines[i];    
-
+			
 			// If the line is empty, don't try to parse as JSON.
 			if (line.trim() == "") {
 				continue;
 			}
+		
+			var publication = JSON.parse(line);	
+	
+			// Do checks on publications of type 'book'
+			if (publication['type'] === 'book'){
 
-			var publication = JSON.parse(line);		
+				// Assume all books don't have identifiers of type ISBN.
+				bookWithoutIdentifierSchemeISBN.push(publication);
+			
+			
+				// For each object in the identifier array, see if the scheme is isbn. 
+				//   If it is, check that the value isn't empty. 
+				//     If if isn't, pop() the pub and break the for loop on identifiers. 
+
+				
+				for(var j = 0; j < publication['identifier'].length; j++){
+					if(publication['identifier'][j]['scheme'] === 'isbn' && publication['identifier'][j]['value'] !== 'undefined'){
+						bookWithoutIdentifierSchemeISBN.pop();
+						break;
+					}
+				}
+				
+				
+				// Assume all books don't have attachments of type borrow.
+				bookWithoutAttachmentTypeBorrow.push(publication);
+
+			    // For each object in the attachment array, see if the type is borrow. 
+			    //   If it is, pop() the pub and break the for look on attachments. 
+				
+				
+				for(var l = 0; l < publication['attachment'].length; l++){
+					if(publication['attachment'][l]['type'] === 'borrow'){
+						bookWithoutAttachmentTypeBorrow.pop();
+						break;
+					}
+				}
+				
+
+			}
+			
+
+			// This stores a concatinated title in the 'name' key of the publication. 
 			publication['name'] = publication['title'];	
 			if (publication['name'].length > 50){
 				publication['name'] = publication['name'].substring(0, 50) + "...";
-			}
+			}		
+		
+			// Add the publication to the 'processed' map under its DOI.
+			// A DOI is a unique URL (web address) for that publication.
 			addToDOIMap(publication, processed);
+
 		}
 
+		// At this point, we have a map called processed that looks like:
+		// processed[" A DOI HERE "] -> [ A PUB ]
+		// or 
+		// processed[" A DOI HERE "] -> [ A PUB, ANOTHER PUB ]
+		//
+		// processed["http://dx.doi.org/10.97/EDE.0000000000000636"][0] =
+		// Object {refereed: "false", __kind__: "Publication", identifier: Array(2), description: Array(1), language: "en"…}	
+		
+		// We want to know how many DOIs list multiple publications. 
+		// If the length of the array under a DOI is greater than or equal to 2, 
+		// Artudis has two publications with the same DOI. That's bad! DOIs should be
+		// unique. 
+		
+		// This little loop figures out how many duplicates we're dealing with. 
+		// That number is used in the header - Same DOI Multiple Publications → $duplicates 
 		var duplicates = 0;
 		for (var name in processed) {
 			if (processed[name].length >= 2){
 				duplicates++;
 			}
 		}
-
+		
+		// `duplicates` is used to build the header. 
+		// `buildDuplicateList()` actually builds the HTML list. 
 		addOutput("pub-output", 
 					"Same DOI Multiple Publications → " + duplicates, 
 					buildDuplicateList(processed, 'pub'));
 
-	}   
+		addOutput("pub-output", 
+					"Publications of type book with no ISBNs → " + bookWithoutIdentifierSchemeISBN.length, 
+					buildList(bookWithoutIdentifierSchemeISBN, comparepubs, 'pub'));
+
+		addOutput("pub-output", 
+					"Publications of type book with no Attachments of type borrow → " + bookWithoutAttachmentTypeBorrow.length, 
+					buildList(bookWithoutAttachmentTypeBorrow, comparepubs, 'pub'));
+		
+
+	}
 
 	document.getElementById('pub-input').onchange = function(){
 		pubCheck_Upload(this.files[0]);
 		this.value = "";
 	};
+
 
 	</script>
 </body>
