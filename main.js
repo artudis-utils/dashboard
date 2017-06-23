@@ -1,5 +1,5 @@
 // Generator for getting objects from json
-function *objectGenerator( filecontents ){
+function* objectGenerator( filecontents ){
     var filelines = filecontents.split("\n");
     for (var i = 0; i < filelines.length; i++) {
         var line = filelines[i];
