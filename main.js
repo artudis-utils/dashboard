@@ -1,7 +1,5 @@
 /* jshint esversion: 6 */
 /* jshint eqeqeq: true */
-/* jshint strict: true */
-
    
 // Generator for getting objects from json
 function* objectGenerator( filecontents ){
