@@ -9,7 +9,7 @@
     	"node-qunit-phantomjs":"latest"
     },
     "scripts": {
-    	"lint": "jshint *.js",
-        "test": "node-qunit-phantomjs tests.html"
+    	"lint": "jshint *.js"
+        //"test": "node-qunit-phantomjs tests.html" someday... when phantomjs isn't ancient...
     }
 }
