@@ -1,0 +1,15 @@
+{
+	"jshintConfig":{
+		"esversion": true,
+		"eqeqeq": true
+	},
+    "devDependencies": {
+    	"qunit":"latest",
+    	"jshint":"latest",
+    	"node-qunit-phantomjs":"latest"
+    },
+    "scripts": {
+    	"lint": "jshint *.js",
+        "test": "node-qunit-phantomjs tests.html"
+    }
+}
