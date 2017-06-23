@@ -62,13 +62,35 @@ function buildAnchorWithOrcid( object, linkcode ){
     a.setAttribute("href", baseURL + "/"+ linkcode +"/" + object.__id__);
     a.setAttribute("target", "_blank");
     div.appendChild(a);
-    div.appendChild(document.createElement("br"));
 
+    div.appendChild(document.createTextNode("["));
     var orcid = document.createElement("a");
     orcid.textContent = "Search ORCID";
     orcid.setAttribute("href", "https://orcid.org/orcid-search/quick-search?searchQuery=" + object.given_name + " " + object.family_name);
     orcid.setAttribute("target", "_blank");
     div.appendChild(orcid);
+    div.appendChild(document.createTextNode("]"));
+    return div;
+}
+
+// Special case - build a link with a canned orcid search
+function buildAnchorWithCatalogueLink( object, linkcode ){
+    var baseURL = document.getElementById("baseURL").value;
+    var div = document.createElement("div");
+
+    var a = document.createElement("a");
+    a.textContent = object.name;
+    a.setAttribute("href", baseURL + "/"+ linkcode +"/" + object.__id__);
+    a.setAttribute("target", "_blank");
+    div.appendChild(a);
+
+    div.appendChild(document.createTextNode("["));
+    var catlink = document.createElement("a");
+    catlink.textContent = "Search catalogue";
+    catlink.setAttribute("href", "http://catalogue.library.carleton.ca/search/?searchtype=t&SORT=D&searchscope=9&submit=Submit&searcharg=" + object.title);
+    catlink.setAttribute("target", "_blank");
+    div.appendChild(catlink);
+    div.appendChild(document.createTextNode("]"));
     return div;
 }
 
@@ -113,6 +135,19 @@ function buildListWithORCIDs( objects, comparefunc, linkcode ){
         var object = objects[i];
         var li = document.createElement("li");
         li.appendChild(buildAnchorWithOrcid(object, linkcode));
+        list.appendChild(li);
+    }
+    return list;
+}
+
+// Build a ul element from an array of objects, with catalogue links.
+function buildListWithCatalogueLinks( objects, comparefunc, linkcode ){
+    objects.sort(comparefunc);
+    var list = document.createElement("ul");
+    for (var i = 0; i < objects.length; i++) {
+        var object = objects[i];
+        var li = document.createElement("li");
+        li.appendChild(buildAnchorWithCatalogueLink(object, linkcode));
         list.appendChild(li);
     }
     return list;
@@ -680,7 +715,7 @@ function pubCheck_Process( filecontents ){
 
     addOutput("pub-output",
                 "Books with no Attachment of type Borrow → " + booksWithoutAttachmentTypeBorrow.length,
-                buildList(booksWithoutAttachmentTypeBorrow, comparepubs, "pub"));
+                buildListWithCatalogueLinks(booksWithoutAttachmentTypeBorrow, comparepubs, "pub"));
 
 }
 
