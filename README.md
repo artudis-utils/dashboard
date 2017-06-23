@@ -1,11 +1,5 @@
 # dashboard
 
-Tests at tests.html
+A dashboard of tests for JSON data from Artudis. 
 
-## TODO:
-
-Add
-
-```"test": "node-qunit-phantomjs tests.html"``` 
-
-someday... when phantomjs supports generators.
+https://artudis-utils.github.io/dashboard/
