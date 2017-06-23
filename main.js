@@ -1,3 +1,8 @@
+/* jshint esversion: 6 */
+/* jshint eqeqeq: true */
+/* jshint strict: true */
+
+   
 // Generator for getting objects from json
 function* objectGenerator( filecontents ){
     var filelines = filecontents.split("\n");
@@ -221,13 +226,13 @@ function objectCheck_hasIdentifier( object, schemeToCheck ){
 
 // Compare people for sorting
 function comparepeople( one,two ) {
-    if (one["family_name"] < two["family_name"])
+    if (one.family_name < two.family_name)
         return -1;
-    if (one["family_name"] > two["family_name"])
+    if (one.family_name > two.family_name)
         return 1;
-    if (one["given_name"] < two["given_name"])
+    if (one.given_name < two.given_name)
         return -1;
-    if (one["given_name"] > two["given_name"])
+    if (one.given_name > two.given_name)
         return 1;
     return 0;
 }
@@ -241,7 +246,7 @@ function personCheck_Upload( file ){
     var reader = new FileReader();
     reader.onload = function( event ) {
         personCheck_Process(event.target.result);
-    }
+    };
     reader.readAsText(file);
 }
 
@@ -250,7 +255,7 @@ function personCheck_hasWorkURL( person ){
     if (checkKeyIsValid(person, "contact")) {
         for (var i = 0; i < person.contact.length; i++){
             var contact = person.contact[i];
-            if (contact.role == "work" && typeof contact.website === "string" && contact.website.length > 1 ){
+            if (contact.role === "work" && typeof contact.website === "string" && contact.website.length > 1 ){
                 return true;
             }
         }
@@ -298,9 +303,9 @@ function personCheck_exposureAllEntityLink( person ){
         for (var i = 0; i < person.exposure.length; i++){
             var exposure = person.exposure[i];
             console.log(exposure);
-            if (typeof exposure.achievement !== "string"
-                && typeof exposure.organisation !== "string"
-                && typeof exposure.event !== "string") {
+            if (typeof exposure.achievement !== "string" &&
+                typeof exposure.organisation !== "string" &&
+                typeof exposure.event !== "string") {
                 return false;
             } else if (typeof exposure.achievement === "string" && exposure.achievement.charAt(0) !== "@" ) {
                 return false;
@@ -421,7 +426,7 @@ function orgCheck_Upload( file ){
     var reader = new FileReader();
     reader.onload = function( event ) {
         orgCheck_Process(event.target.result);
-    }
+    };
     reader.readAsText(file);
 }
 
@@ -443,7 +448,7 @@ function orgCheck_hasHomepage( org ){
     if (checkKeyIsValid(org, "contact")) {
         for (var i = 0; i < org.contact.length; i++){
             var contact = org.contact[i];
-            if(contact.hasOwnProperty("website") && contact["website"] !== null && contact["website"].length > 1){
+            if(contact.hasOwnProperty("website") && contact.website !== null && contact.website.length > 1){
                 return true;
             }
         }
@@ -539,7 +544,7 @@ function colCheck_Upload( file ){
     var reader = new FileReader();
     reader.onload = function( event ) {
         colCheck_Process(event.target.result);
-    }
+    };
     reader.readAsText(file);
 }
 
@@ -578,9 +583,9 @@ if ( colInputElement ){
 
 // Compare publications for sorting
 function comparepubs(one,two) {
-    if (one["title"] < two["title"])
+    if (one.title < two.title)
         return -1;
-    if (one["title"] > two["title"])
+    if (one.title > two.title)
         return 1;
     return 0;
 }
@@ -595,7 +600,7 @@ function pubCheck_Upload( file ){
     var reader = new FileReader();
     reader.onload = function( event ) {
         pubCheck_Process(event.target.result);
-    }
+    };
     reader.readAsText(file);
 }
 
@@ -626,7 +631,7 @@ function pubCheck_Process( filecontents ){
     for (var publication of objectGenerator(filecontents)) { 
 
         // Do checks on publications of type "book"
-        if (publication["type"] === "book") {
+        if (publication.type === "book") {
             if (!objectCheck_hasIdentifier(publication, "isbn")) booksWithoutIdentifierSchemeISBN.push(publication);
             if (!pubCheck_hasAttachmentTypeBorrow(publication)) booksWithoutAttachmentTypeBorrow.push(publication);  
         }
