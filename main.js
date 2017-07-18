@@ -535,7 +535,7 @@ function orgCheck_Process( filecontents ){
 
     addOutput("org-output",
                 "Organizations with Duplicate Identifier Schemes → " + withDuplicateIdentifiers.length,
-                buildList(withDuplicateIdentifiers, compareorgs, "org", true));
+                buildListWithLabels(withDuplicateIdentifiers, compareorgs, "org", true));
 
     addOutput("org-output",
                 "Organizations without Scopus ID → " + withoutScopusID.length,
