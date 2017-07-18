@@ -506,6 +506,8 @@ function orgCheck_Process( filecontents ){
     var withoutRelation = [];
     var withDuplicateIdentifiers = [];
     var withoutScopusID = [];
+    var withoutRinggoldID = [];
+    var withoutISNI = [];
 
     var nameToOrg = new Map();
 
@@ -521,6 +523,8 @@ function orgCheck_Process( filecontents ){
         }
 
         if (!objectCheck_hasIdentifier(org, "scopus")) withoutScopusID.push(org);
+        if (!objectCheck_hasIdentifier(org, "ringgoldid")) withoutRinggoldID.push(org);
+        if (!objectCheck_hasIdentifier(org, "isni")) withoutISNI.push(org);
 
         addToNameMap(org, nameToOrg);
     }
@@ -540,6 +544,14 @@ function orgCheck_Process( filecontents ){
     addOutput("org-output",
                 "Organizations without Scopus ID → " + withoutScopusID.length,
                 buildList(withoutScopusID, compareorgs, "org"));
+
+    addOutput("org-output",
+                "Organizations without Ringgold ID → " + withoutRinggoldID.length,
+                buildList(withoutRinggoldID, compareorgs, "org"));
+
+    addOutput("org-output",
+                "Organizations without ISNI → " + withoutISNI.length,
+                buildList(withoutISNI, compareorgs, "org"));
 
     addOutput("org-output",
                 "Organizations without a description → " + withoutDescriptions.length,
