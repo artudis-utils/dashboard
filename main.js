@@ -218,10 +218,10 @@ function checkKeyIsValid( object, key ){
         return true;
     } else {
         return false;
-    }   
+    }
 }
 
-// Return a list of identifier schemes which are duplicated in the a record. 
+// Return a list of identifier schemes which are duplicated in the a record.
 function objectCheck_duplicateIdentifiers( object ){
 
     var duplicates = new Set();
@@ -342,7 +342,7 @@ function personCheck_hasNameAlternative( person ){
         }
     }
     return false;
-}   
+}
 
 // Check if a person's exposures all link to an entitiy.
 function personCheck_exposureAllEntityLink( person ){
@@ -363,7 +363,7 @@ function personCheck_exposureAllEntityLink( person ){
         }
     }
     return true;
-}      
+}
 
 // Process the contents of the JSON file line by line.
 // Find people who raise red flags.
@@ -486,9 +486,9 @@ function orgCheck_hasDescription( org ){
                 return true;
             }
         }
-    } 
+    }
     return false;
-}        
+}
 
 // Check if an org has a homepage.
 function orgCheck_hasHomepage( org ){
@@ -509,7 +509,7 @@ function orgCheck_hasRelation( org ){
         return true;
     }
     return false;
-}     
+}
 
 // Process the contents of the JSON file line by line.
 // Find orgs which raise red flags.
@@ -638,7 +638,7 @@ function colCheck_Process( filecontents ){
 
     var withoutPublisher = [];
 
-    for (var col of objectGenerator(filecontents)){      
+    for (var col of objectGenerator(filecontents)){
 
         if (!colCheck_hasPublisher(col)) withoutPublisher.push(col);
 
@@ -678,7 +678,7 @@ if ( colInputElement ){
 // ----- Publications -----
 
 // Compare publications for sorting
-function comparepubs(one,two){
+function comparepubs( one,two ){
     if (one.title < two.title)
         return -1;
     if (one.title > two.title)
@@ -715,7 +715,7 @@ function pubCheck_hasAttachmentTypeBorrow( publication ){
         }
     }
     return false;
-}     
+}
 
 // Process the contents of the JSON file line by line.
 // Find publications that raise red flags.
@@ -729,12 +729,12 @@ function pubCheck_Process( filecontents ){
     // store type book w/o attachment of type "borrow"
     var booksWithoutAttachmentTypeBorrow = [];
 
-    for (var publication of objectGenerator(filecontents)){ 
+    for (var publication of objectGenerator(filecontents)){
 
         // Do checks on publications of type "book"
         if (publication.type === "book"){
             if (!objectCheck_hasIdentifier(publication, "isbn")) booksWithoutIdentifierSchemeISBN.push(publication);
-            if (!pubCheck_hasAttachmentTypeBorrow(publication)) booksWithoutAttachmentTypeBorrow.push(publication);  
+            if (!pubCheck_hasAttachmentTypeBorrow(publication)) booksWithoutAttachmentTypeBorrow.push(publication);
         }
 
         // This stores a concatinated title in the "name" key of the publication.

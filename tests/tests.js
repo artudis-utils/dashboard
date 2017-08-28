@@ -398,7 +398,7 @@ QUnit.test( "colCheck_hasPublisher", function( assert ) {
             {
                 "role": "publisher"
             }
-        ]     
+        ]
     }
     assert.ok(colCheck_hasPublisher(hasContributorRolePublisher), "return true since col has contributor with role publisher");
 
@@ -407,12 +407,12 @@ QUnit.test( "colCheck_hasPublisher", function( assert ) {
             {
                 "role": "xoxoxoxo"
             }
-        ]     
+        ]
     }
     assert.notOk(colCheck_hasPublisher(hasContributorRoleNotPublisher), "return false since col has contributor with role xoxox, not publisher");
 
     hasEmptyContributor = {
-       "contributor": []     
+       "contributor": []
     }
     assert.notOk(colCheck_hasPublisher(hasEmptyContributor), "return false since col has contributor which is empty");
 
@@ -426,8 +426,8 @@ QUnit.test( "colCheck_hasPublisher", function( assert ) {
 QUnit.test( "pubCheck_hasAttachmentTypeBorrow", function( assert ) {
 
     hasAttachmentTypeBorrow = {
-        "attachment": [  
-            {  
+        "attachment": [
+            {
                 "type":"borrow"
             }
         ]
@@ -435,8 +435,8 @@ QUnit.test( "pubCheck_hasAttachmentTypeBorrow", function( assert ) {
     assert.ok(pubCheck_hasAttachmentTypeBorrow(hasAttachmentTypeBorrow), "return true since pub has attachment type borrow");
 
     hasAttachmentNotBorrow = {
-        "attachment": [  
-            {  
+        "attachment": [
+            {
                 "type":"notborrow"
             }
         ]
