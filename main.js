@@ -4,10 +4,10 @@
 // Generator for getting objects from json
 function* objectGenerator( filecontents ){
     var filelines = filecontents.split("\n");
-    for (var i = 0; i < filelines.length; i++) {
+    for (var i = 0; i < filelines.length; i++){
         var line = filelines[i];
         // If the line is empty, don't try to parse as JSON.
-        if (line.trim() === "") {
+        if (line.trim() === ""){
             continue;
         }
         yield JSON.parse(line);
@@ -17,10 +17,10 @@ function* objectGenerator( filecontents ){
 // If the base Artudis URL changes, update all the download links
 // on the page.
 var baseURLElement = document.getElementById("baseURL");
-if ( baseURLElement ) {
+if ( baseURLElement ){
     baseURLElement.onchange = function(){
         var links = document.getElementsByClassName("download-link");
-        for (var i = 0; i < links.length; i++) {
+        for (var i = 0; i < links.length; i++){
             links[i].setAttribute("href",
                 links[i].getAttribute("href").replace(
                     new RegExp("^https?://[a-zA-Z.]*/"), this.value + "/")
@@ -98,7 +98,7 @@ function buildAnchorWithCatalogueLink( object, linkcode ){
 function buildList( objects, comparefunc, linkcode ){
     objects.sort(comparefunc);
     var list = document.createElement("ul");
-    for (var i = 0; i < objects.length; i++) {
+    for (var i = 0; i < objects.length; i++){
         var object = objects[i];
         var li = document.createElement("li");
         li.appendChild(buildAnchor(object, linkcode));
@@ -111,11 +111,11 @@ function buildList( objects, comparefunc, linkcode ){
 function buildListWithLabels( objects, comparefunc, linkcode ){
     objects.sort(comparefunc);
     var list = document.createElement("ul");
-    for (var i = 0; i < objects.length; i++) {
+    for (var i = 0; i < objects.length; i++){
         var object = objects[i];
         var li = document.createElement("li");
         li.appendChild(buildAnchor(object, linkcode));
-        if (typeof object.labels !== "undefined" ) {
+        if (typeof object.labels !== "undefined" ){
             var label = document.createElement("span");
             for (var j = 0; j < object.labels.length; j++){
                 label.textContent += object.labels[j] + " ";
@@ -131,7 +131,7 @@ function buildListWithLabels( objects, comparefunc, linkcode ){
 function buildListWithORCIDs( objects, comparefunc, linkcode ){
     objects.sort(comparefunc);
     var list = document.createElement("ul");
-    for (var i = 0; i < objects.length; i++) {
+    for (var i = 0; i < objects.length; i++){
         var object = objects[i];
         var li = document.createElement("li");
         li.appendChild(buildAnchorWithOrcid(object, linkcode));
@@ -144,7 +144,7 @@ function buildListWithORCIDs( objects, comparefunc, linkcode ){
 function buildListWithCatalogueLinks( objects, comparefunc, linkcode ){
     objects.sort(comparefunc);
     var list = document.createElement("ul");
-    for (var i = 0; i < objects.length; i++) {
+    for (var i = 0; i < objects.length; i++){
         var object = objects[i];
         var li = document.createElement("li");
         li.appendChild(buildAnchorWithCatalogueLink(object, linkcode));
@@ -174,7 +174,7 @@ function addToNameMap( object, map ){
 // If the object DOI is in the map,
 // push the object to the existing array.
 function addToDOIMap( object, map ){
-    if (checkKeyIsValid(object, "identifier")) {
+    if (checkKeyIsValid(object, "identifier")){
         for (var i = 0; i < object.identifier.length; i++){
             var scheme = object.identifier[i].scheme;
             if (scheme === "doi"){
@@ -193,11 +193,11 @@ function addToDOIMap( object, map ){
 function buildDuplicateList( duplicates, linkcode ){
     var list = document.createElement("ul");
 
-    for (var value of duplicates.values()) {
-        if (value.length >= 2) {
+    for (var value of duplicates.values()){
+        if (value.length >= 2){
             var item = document.createElement("li");
             var sublist = document.createElement("ul");
-            for (var i = 0; i < value.length; i++) {
+            for (var i = 0; i < value.length; i++){
                 var object = value[i];
                 var li = document.createElement("li");
                 li.appendChild(buildAnchor(object, linkcode));
@@ -214,7 +214,7 @@ function buildDuplicateList( duplicates, linkcode ){
 }
 
 function checkKeyIsValid( object, key ){
-    if ( object.hasOwnProperty(key) && typeof object[key] !== "undefined" && object[key] !== null) {
+    if ( object.hasOwnProperty(key) && typeof object[key] !== "undefined" && object[key] !== null){
         return true;
     } else {
         return false;
@@ -227,7 +227,7 @@ function objectCheck_duplicateIdentifiers( object ){
     var duplicates = new Set();
     var setOfSchemes = new Set();
 
-    if (checkKeyIsValid(object, "identifier")) {
+    if (checkKeyIsValid(object, "identifier")){
         for (var i = 0; i < object.identifier.length; i++){
             var scheme = object.identifier[i].scheme;
             if (setOfSchemes.has(scheme)){
@@ -243,7 +243,7 @@ function objectCheck_duplicateIdentifiers( object ){
 
 // Check if a object has an identifier of a particular scheme.
 function objectCheck_hasIdentifier( object, schemeToCheck ){
-    if (checkKeyIsValid(object, "identifier")) {
+    if (checkKeyIsValid(object, "identifier")){
         for (var i = 0; i < object.identifier.length; i++){
             var scheme = object.identifier[i].scheme;
             var value = object.identifier[i].value;
@@ -255,10 +255,19 @@ function objectCheck_hasIdentifier( object, schemeToCheck ){
     return false;
 }
 
+// Compare objects by name attribute for sorting
+function compareByName( one, two ){
+    if (one.name < two.name)
+        return -1;
+    if (one.name > two.name)
+        return 1;
+    return 0;
+}
+
 // ----- People -----
 
 // Compare people for sorting
-function comparepeople( one,two ) {
+function comparepeople( one,two ){
     if (one.family_name < two.family_name)
         return -1;
     if (one.family_name > two.family_name)
@@ -277,7 +286,7 @@ function personCheck_Upload( file ){
     document.getElementById("person-output").innerHTML = "";
 
     var reader = new FileReader();
-    reader.onload = function( event ) {
+    reader.onload = function( event ){
         personCheck_Process(event.target.result);
     };
     reader.readAsText(file);
@@ -285,7 +294,7 @@ function personCheck_Upload( file ){
 
 // Check if a person object has a work website contact.
 function personCheck_hasWorkURL( person ){
-    if (checkKeyIsValid(person, "contact")) {
+    if (checkKeyIsValid(person, "contact")){
         for (var i = 0; i < person.contact.length; i++){
             var contact = person.contact[i];
             if (contact.role === "work" && typeof contact.website === "string" && contact.website.length > 1 ){
@@ -298,7 +307,7 @@ function personCheck_hasWorkURL( person ){
 
 // Check if a person object has no identifiers.
 function personCheck_hasIdentifiers( person ){
-    if (checkKeyIsValid(person, "identifier") && person.identifier.length > 0) {
+    if (checkKeyIsValid(person, "identifier") && person.identifier.length > 0){
         return true;
     }
     return false;
@@ -306,7 +315,7 @@ function personCheck_hasIdentifiers( person ){
 
 // Check if a person has an employer.
 function personCheck_hasEmployer( person ){
-    if (checkKeyIsValid(person, "affiliation")) {
+    if (checkKeyIsValid(person, "affiliation")){
         for (var i = 0; i < person.affiliation.length; i++){
             var affiliation = person.affiliation[i];
             if (affiliation.role === "employer" ){
@@ -319,7 +328,7 @@ function personCheck_hasEmployer( person ){
 
 // Check is a person has a name alternative.
 function personCheck_hasNameAlternative( person ){
-    if (checkKeyIsValid(person, "name_info")) {
+    if (checkKeyIsValid(person, "name_info")){
         for (var i = 0; i < person.name_info.length; i++){
             var nameinfo = person.name_info[i];
             if (nameinfo.type === "alternative" ){
@@ -332,19 +341,18 @@ function personCheck_hasNameAlternative( person ){
 
 // Check if a person's exposures all link to an entitiy.
 function personCheck_exposureAllEntityLink( person ){
-    if (checkKeyIsValid(person, "exposure")) {
+    if (checkKeyIsValid(person, "exposure")){
         for (var i = 0; i < person.exposure.length; i++){
             var exposure = person.exposure[i];
-            console.log(exposure);
             if (typeof exposure.achievement !== "string" &&
                 typeof exposure.organisation !== "string" &&
-                typeof exposure.event !== "string") {
+                typeof exposure.event !== "string"){
                 return false;
-            } else if (typeof exposure.achievement === "string" && exposure.achievement.charAt(0) !== "@" ) {
+            } else if (typeof exposure.achievement === "string" && exposure.achievement.charAt(0) !== "@" ){
                 return false;
-            } else if (typeof exposure.organisation === "string" && exposure.organisation.charAt(0) !== "@" ) {
+            } else if (typeof exposure.organisation === "string" && exposure.organisation.charAt(0) !== "@" ){
                 return false;
-            } else if (typeof exposure.event === "string" && exposure.event.charAt(0) !== "@" ) {
+            } else if (typeof exposure.event === "string" && exposure.event.charAt(0) !== "@" ){
                 return false;
             }
         }
@@ -366,7 +374,7 @@ function personCheck_Process( filecontents ){
 
     var nameToPeople = new Map();
 
-    for (var person of objectGenerator(filecontents)) {
+    for (var person of objectGenerator(filecontents)){
 
         person.name = person.family_name + ", " + person.given_name;
 
@@ -419,7 +427,7 @@ function personCheck_Process( filecontents ){
                 buildList(withExposureNoLink, comparepeople, "ppl"));
 
     var duplicates = 0;
-    for (var value of nameToPeople.values()) {
+    for (var value of nameToPeople.values()){
         if (value.length >= 2){
             duplicates++;
         }
@@ -441,15 +449,6 @@ if (personInputElement){
 
 // ----- Organizations -----
 
-// Compare orgs for sorting
-function compareorgs( one,two ) {
-    if (one.name < two.name)
-        return -1;
-    if (one.name > two.name)
-        return 1;
-    return 0;
-}
-
 // Load in the local file using a FileReader.
 function orgCheck_Upload( file ){
 
@@ -457,7 +456,7 @@ function orgCheck_Upload( file ){
     document.getElementById("org-output").innerHTML = "";
 
     var reader = new FileReader();
-    reader.onload = function( event ) {
+    reader.onload = function( event ){
         orgCheck_Process(event.target.result);
     };
     reader.readAsText(file);
@@ -465,7 +464,7 @@ function orgCheck_Upload( file ){
 
 // Check if org has a description.
 function orgCheck_hasDescription( org ){
-    if (checkKeyIsValid(org, "description")) {
+    if (checkKeyIsValid(org, "description")){
         for (var i = 0; i < org.description.length; i++){
             var description = org.description[i];
             if (description.type === "description" && description.value.length > 1 ){
@@ -478,7 +477,7 @@ function orgCheck_hasDescription( org ){
 
 // Check if an org has a homepage.
 function orgCheck_hasHomepage( org ){
-    if (checkKeyIsValid(org, "contact")) {
+    if (checkKeyIsValid(org, "contact")){
         for (var i = 0; i < org.contact.length; i++){
             var contact = org.contact[i];
             if(contact.hasOwnProperty("website") && contact.website !== null && contact.website.length > 1){
@@ -491,7 +490,7 @@ function orgCheck_hasHomepage( org ){
 
 // Check if an org has a relation
 function orgCheck_hasRelation( org ){
-    if (checkKeyIsValid(org, "relation") && org.relation.length > 0) {
+    if (checkKeyIsValid(org, "relation") && org.relation.length > 0){
         return true;
     }
     return false;
@@ -511,7 +510,7 @@ function orgCheck_Process( filecontents ){
 
     var nameToOrg = new Map();
 
-    for (var org of objectGenerator(filecontents)) {
+    for (var org of objectGenerator(filecontents)){
 
         if (!orgCheck_hasDescription(org)) withoutDescriptions.push(org);
         if (!orgCheck_hasHomepage(org)) withoutHomepages.push(org);
@@ -531,34 +530,34 @@ function orgCheck_Process( filecontents ){
 
     addOutput("org-output",
                 "Organizations without a website contact → " + withoutHomepages.length,
-                buildList(withoutHomepages, compareorgs, "org"));
+                buildList(withoutHomepages, compareByName, "org"));
 
     addOutput("org-output",
                 "Organizations without any relations → " + withoutRelation.length,
-                buildList(withoutRelation, compareorgs, "org"));
+                buildList(withoutRelation, compareByName, "org"));
 
     addOutput("org-output",
                 "Organizations with Duplicate Identifier Schemes → " + withDuplicateIdentifiers.length,
-                buildListWithLabels(withDuplicateIdentifiers, compareorgs, "org", true));
+                buildListWithLabels(withDuplicateIdentifiers, compareByName, "org", true));
 
     addOutput("org-output",
                 "Organizations without Scopus ID → " + withoutScopusID.length,
-                buildList(withoutScopusID, compareorgs, "org"));
+                buildList(withoutScopusID, compareByName, "org"));
 
     addOutput("org-output",
                 "Organizations without Ringgold ID → " + withoutRinggoldID.length,
-                buildList(withoutRinggoldID, compareorgs, "org"));
+                buildList(withoutRinggoldID, compareByName, "org"));
 
     addOutput("org-output",
                 "Organizations without ISNI → " + withoutISNI.length,
-                buildList(withoutISNI, compareorgs, "org"));
+                buildList(withoutISNI, compareByName, "org"));
 
     addOutput("org-output",
                 "Organizations without a description → " + withoutDescriptions.length,
-                buildList(withoutDescriptions, compareorgs, "org"));
+                buildList(withoutDescriptions, compareByName, "org"));
 
     var duplicates = 0;
-    for (var value of nameToOrg.values()) {
+    for (var value of nameToOrg.values()){
         if (value.length >= 2){
             duplicates++;
         }
@@ -587,10 +586,23 @@ function colCheck_Upload( file ){
     document.getElementById("col-output").innerHTML = "";
 
     var reader = new FileReader();
-    reader.onload = function( event ) {
+    reader.onload = function( event ){
         colCheck_Process(event.target.result);
     };
     reader.readAsText(file);
+}
+
+// Check if an col has a publisher
+function colCheck_hasPublisher( col ){
+    if (checkKeyIsValid(col, "contributor")){
+        for (var i = 0; i < col.contributor.length; i++){
+            var contributor = col.contributor[i];
+            if(contributor.hasOwnProperty("role") && contributor.role === "publisher"){
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 // Process the contents of the JSON file line by line.
@@ -599,12 +611,21 @@ function colCheck_Process( filecontents ){
 
     var nameToCollection = new Map();
 
-    for (var collection of objectGenerator(filecontents)) {        
-        addToNameMap(collection, nameToCollection);
+    var withoutPublisher = [];
+
+    for (var col of objectGenerator(filecontents)){      
+
+        if (!colCheck_hasPublisher(col)) withoutPublisher.push(col);
+
+        addToNameMap(col, nameToCollection);
     }
 
+    addOutput("col-output",
+                "Collections without a publisher → " + withoutPublisher.length,
+                buildList(withoutPublisher, compareByName, "col"));
+
     var duplicates = 0;
-    for (var value of nameToCollection.values()) {
+    for (var value of nameToCollection.values()){
         if (value.length >= 2){
             duplicates++;
         }
@@ -627,7 +648,7 @@ if ( colInputElement ){
 // ----- Publications -----
 
 // Compare publications for sorting
-function comparepubs(one,two) {
+function comparepubs(one,two){
     if (one.title < two.title)
         return -1;
     if (one.title > two.title)
@@ -643,17 +664,17 @@ function pubCheck_Upload( file ){
     document.getElementById("pub-output").innerHTML = "";
 
     var reader = new FileReader();
-    reader.onload = function( event ) {
+    reader.onload = function( event ){
         pubCheck_Process(event.target.result);
     };
     reader.readAsText(file);
 }
 
 // Check if an publication has attachment of type borrow.
-function pubCheck_hasAttachmentTypeBorrow( publication ) {
-    if (checkKeyIsValid(publication, "attachment")) {
-        for (var i = 0; i < publication.attachment.length; i++) {
-            if (publication.attachment[i].type === "borrow") {
+function pubCheck_hasAttachmentTypeBorrow( publication ){
+    if (checkKeyIsValid(publication, "attachment")){
+        for (var i = 0; i < publication.attachment.length; i++){
+            if (publication.attachment[i].type === "borrow"){
                 return true;
             }
         }
@@ -673,10 +694,10 @@ function pubCheck_Process( filecontents ){
     //store type book w/o attachment of type "borrow"
     var booksWithoutAttachmentTypeBorrow = [];
 
-    for (var publication of objectGenerator(filecontents)) { 
+    for (var publication of objectGenerator(filecontents)){ 
 
         // Do checks on publications of type "book"
-        if (publication.type === "book") {
+        if (publication.type === "book"){
             if (!objectCheck_hasIdentifier(publication, "isbn")) booksWithoutIdentifierSchemeISBN.push(publication);
             if (!pubCheck_hasAttachmentTypeBorrow(publication)) booksWithoutAttachmentTypeBorrow.push(publication);  
         }
@@ -709,7 +730,7 @@ function pubCheck_Process( filecontents ){
     // This little loop figures out how many duplicates we're dealing with.
     // That number is used in the header - Same DOI Multiple Publications → $duplicates
     var duplicates = 0;
-    for (var value of nameToPublication.values()) {
+    for (var value of nameToPublication.values()){
         if (value.length >= 2){
             duplicates++;
         }

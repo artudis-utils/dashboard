@@ -18,7 +18,7 @@ QUnit.test( "objectCheck_duplicateIdentifiers", function( assert ) {
             }
         ]
     }
-    assert.deepEqual(objectCheck_duplicateIdentifiers(hasDuplicateIdentifiers), ['scopus'], "correct list of duplicated identifiers")
+    assert.deepEqual(objectCheck_duplicateIdentifiers(hasDuplicateIdentifiers), ['scopus'], "correct list of duplicated identifiers");
 
     var noDuplicateIdentifiers =  {
         "identifier":[
@@ -36,7 +36,7 @@ QUnit.test( "objectCheck_duplicateIdentifiers", function( assert ) {
             }
         ]
     }
-    assert.deepEqual(objectCheck_duplicateIdentifiers(noDuplicateIdentifiers), [], "empty list, no duplicates")
+    assert.deepEqual(objectCheck_duplicateIdentifiers(noDuplicateIdentifiers), [], "empty list, no duplicates");
 
 });
 
@@ -103,7 +103,7 @@ QUnit.test( "personCheck_hasWorkURL", function( assert ) {
             }
         ]
     }
-    assert.ok( personCheck_hasWorkURL(hasWorkURL), "returned true when there was a work website link" );
+    assert.ok( personCheck_hasWorkURL(hasWorkURL), "returned true when there was a work website link");
 
     var emptyWorkURL = {
         "contact": [
@@ -113,7 +113,7 @@ QUnit.test( "personCheck_hasWorkURL", function( assert ) {
             }
         ]
     }
-    assert.notOk( personCheck_hasWorkURL(emptyWorkURL), "returned false when there was a work contact but no website link" );
+    assert.notOk( personCheck_hasWorkURL(emptyWorkURL), "returned false when there was a work contact but no website link");
 
     var nullWorkURL = {
         "contact": [
@@ -123,12 +123,12 @@ QUnit.test( "personCheck_hasWorkURL", function( assert ) {
             }
         ]
     }
-    assert.notOk( personCheck_hasWorkURL(nullWorkURL), "returned false when there was a work contact but website link is null" );
+    assert.notOk( personCheck_hasWorkURL(nullWorkURL), "returned false when there was a work contact but website link is null");
 
     var emptyContact = {
         "contact": []
     }
-    assert.notOk( personCheck_hasWorkURL(emptyContact), "returned false when contacts were empty" );
+    assert.notOk( personCheck_hasWorkURL(emptyContact), "returned false when contacts were empty");
 
     var noWorkURL = {
         "contact": [
@@ -138,7 +138,7 @@ QUnit.test( "personCheck_hasWorkURL", function( assert ) {
             }
         ]
     }
-    assert.notOk( personCheck_hasWorkURL(noWorkURL), "returned false when there was NOT a work website link" );
+    assert.notOk( personCheck_hasWorkURL(noWorkURL), "returned false when there was NOT a work website link");
 });
 
 QUnit.test( "personCheck_hasIdentifiers", function( assert ) {
@@ -151,17 +151,17 @@ QUnit.test( "personCheck_hasIdentifiers", function( assert ) {
             }
         ]
     }
-    assert.ok( personCheck_hasIdentifiers(hasIdentifiers), "returned true when there were identifiers" );
+    assert.ok( personCheck_hasIdentifiers(hasIdentifiers), "returned true when there were identifiers");
 
 
     var noIdentifiers = {}
-    assert.notOk( personCheck_hasIdentifiers(noIdentifiers), "returned false when there were no identifiers" );
+    assert.notOk( personCheck_hasIdentifiers(noIdentifiers), "returned false when there were no identifiers");
 
 
     var emptyIdentifiers = {
         "identifier": []
     }
-    assert.notOk( personCheck_hasIdentifiers(emptyIdentifiers), "returned false when there was an empty identifier list" );
+    assert.notOk( personCheck_hasIdentifiers(emptyIdentifiers), "returned false when there was an empty identifier list");
 });
 
 QUnit.test( "personCheck_hasEmployer", function( assert ) {
@@ -174,15 +174,15 @@ QUnit.test( "personCheck_hasEmployer", function( assert ) {
             }
         ]
     }
-    assert.ok(personCheck_hasEmployer(hasEmployer), "returned true when person had employer" );
+    assert.ok(personCheck_hasEmployer(hasEmployer), "returned true when person had employer");
 
     var noAffiliation = {}
-    assert.notOk( personCheck_hasEmployer(noAffiliation), "returned false when there was no affiliation key" );
+    assert.notOk( personCheck_hasEmployer(noAffiliation), "returned false when there was no affiliation key");
 
     var emptyAffiliation = {
         "affiliation": []
     }
-    assert.notOk( personCheck_hasEmployer(emptyAffiliation), "returned false when the affiliation was empty" );
+    assert.notOk( personCheck_hasEmployer(emptyAffiliation), "returned false when the affiliation was empty");
 
     var noEmployerAffiliation = {
         "affiliation": [
@@ -192,7 +192,7 @@ QUnit.test( "personCheck_hasEmployer", function( assert ) {
             }
         ]
     }
-    assert.notOk( personCheck_hasEmployer(noEmployerAffiliation), "returned false when there was no affilication of role employer" );
+    assert.notOk( personCheck_hasEmployer(noEmployerAffiliation), "returned false when there was no affilication of role employer");
 });
 
 QUnit.test( "personCheck_hasNameAlternative", function( assert ) {
@@ -205,7 +205,7 @@ QUnit.test( "personCheck_hasNameAlternative", function( assert ) {
             }
         ]
     }
-    assert.ok(personCheck_hasNameAlternative(hasNameVariant), "returned true when person has alternative name" );
+    assert.ok(personCheck_hasNameAlternative(hasNameVariant), "returned true when person has alternative name");
 
     var hasNoNameVariant = {
         "name_info":[
@@ -215,12 +215,12 @@ QUnit.test( "personCheck_hasNameAlternative", function( assert ) {
             }
         ]
     }
-    assert.notOk(personCheck_hasNameAlternative(hasNoNameVariant), "returned false when person has no alternative name" );
+    assert.notOk(personCheck_hasNameAlternative(hasNoNameVariant), "returned false when person has no alternative name");
 
     var emptyNameInfo = {
         "name_info":[]
     }
-    assert.notOk(personCheck_hasNameAlternative(emptyNameInfo), "returned false when person's name_info was empty" );
+    assert.notOk(personCheck_hasNameAlternative(emptyNameInfo), "returned false when person's name_info was empty");
 
 });
 
@@ -376,20 +376,50 @@ QUnit.test( "orgCheck_hasRelation", function( assert ) {
             }
         ]
     }
-    assert.ok(orgCheck_hasRelation(hasRelation), "return true since org has relation")
+    assert.ok(orgCheck_hasRelation(hasRelation), "return true since org has relation");
 
     emptyRelation = {
         "relation":[]
     }
-    assert.notOk(orgCheck_hasRelation(emptyRelation), "return false since org has empty relations")
+    assert.notOk(orgCheck_hasRelation(emptyRelation), "return false since org has empty relations");
 
     noRelation = {
     }
-    assert.notOk(orgCheck_hasRelation(noRelation), "return true since org has no relations")
+    assert.notOk(orgCheck_hasRelation(noRelation), "return true since org has no relations");
 
 });
 
 /* Collection Check Tests */
+
+QUnit.test( "colCheck_hasPublisher", function( assert ) {
+
+    hasContributorRolePublisher = {
+       "contributor": [
+            {
+                "role": "publisher"
+            }
+        ]     
+    }
+    assert.ok(colCheck_hasPublisher(hasContributorRolePublisher), "return true since col has contributor with role publisher");
+
+    hasContributorRoleNotPublisher = {
+       "contributor": [
+            {
+                "role": "xoxoxoxo"
+            }
+        ]     
+    }
+    assert.notOk(colCheck_hasPublisher(hasContributorRoleNotPublisher), "return false since col has contributor with role xoxox, not publisher");
+
+    hasEmptyContributor = {
+       "contributor": []     
+    }
+    assert.notOk(colCheck_hasPublisher(hasEmptyContributor), "return false since col has contributor which is empty");
+
+    hasNoContributor = {}
+    assert.notOk(colCheck_hasPublisher(hasNoContributor), "return false since col has no contributor");
+
+});
 
 /* Pub Check Tests */
 
@@ -402,7 +432,7 @@ QUnit.test( "pubCheck_hasAttachmentTypeBorrow", function( assert ) {
             }
         ]
     }
-    assert.ok(pubCheck_hasAttachmentTypeBorrow(hasAttachmentTypeBorrow), "return true since pub has attachment type borrow")
+    assert.ok(pubCheck_hasAttachmentTypeBorrow(hasAttachmentTypeBorrow), "return true since pub has attachment type borrow");
 
     hasAttachmentNotBorrow = {
         "attachment": [  
@@ -411,14 +441,14 @@ QUnit.test( "pubCheck_hasAttachmentTypeBorrow", function( assert ) {
             }
         ]
     }
-    assert.notOk(pubCheck_hasAttachmentTypeBorrow(hasAttachmentNotBorrow), "return false since pub has attachment type notborrow")
+    assert.notOk(pubCheck_hasAttachmentTypeBorrow(hasAttachmentNotBorrow), "return false since pub has attachment type notborrow");
 
     emptyAttachment = {
         "attachment": []
     }
-    assert.notOk(pubCheck_hasAttachmentTypeBorrow(emptyAttachment), "return false since pub has empty attachment ")
+    assert.notOk(pubCheck_hasAttachmentTypeBorrow(emptyAttachment), "return false since pub has empty attachment");
 
     noAttachment = {}
-    assert.notOk(pubCheck_hasAttachmentTypeBorrow(noAttachment), "return false since pub has no attachment ")
+    assert.notOk(pubCheck_hasAttachmentTypeBorrow(noAttachment), "return false since pub has no attachment");
 
 });
