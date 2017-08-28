@@ -1,6 +1,6 @@
 /* jshint esversion: 6 */
 /* jshint eqeqeq: true */
-   
+
 // Generator for getting objects from json
 function* objectGenerator( filecontents ){
     var filelines = filecontents.split("\n");
@@ -282,8 +282,13 @@ function comparepeople( one,two ){
 // Load in the local file using a FileReader.
 function personCheck_Upload( file ){
 
-    //Clear the old output
+    //  Clear the old output
     document.getElementById("person-output").innerHTML = "";
+
+    // Add spinner
+    if (!document.getElementById("person-input").classList.contains('loading')){
+        document.getElementById("person-input").classList.add('loading');
+    }
 
     var reader = new FileReader();
     reader.onload = function( event ){
@@ -437,6 +442,11 @@ function personCheck_Process( filecontents ){
                 "Same Name Multiple People → " + duplicates,
                 buildDuplicateList(nameToPeople, "ppl"));
 
+    // Remove spinner
+    if (document.getElementById("person-input").classList.contains('loading')){
+        document.getElementById("person-input").classList.remove('loading');
+    }
+
 }
 
 var personInputElement = document.getElementById("person-input");
@@ -452,8 +462,13 @@ if (personInputElement){
 // Load in the local file using a FileReader.
 function orgCheck_Upload( file ){
 
-    //Clear the old output
+    // Clear the old output
     document.getElementById("org-output").innerHTML = "";
+
+    // Add spinner
+    if (!document.getElementById("org-input").classList.contains('loading')){
+        document.getElementById("org-input").classList.add('loading');
+    }
 
     var reader = new FileReader();
     reader.onload = function( event ){
@@ -566,6 +581,11 @@ function orgCheck_Process( filecontents ){
     addOutput("org-output",
                 "Same Name Multiple Organizations → " + duplicates,
                 buildDuplicateList(nameToOrg, "org"));
+
+    // Remove spinner
+    if (document.getElementById("org-input").classList.contains('loading')){
+        document.getElementById("org-input").classList.remove('loading');
+    }
 }
 
 var orgInputElement = document.getElementById("org-input");
@@ -582,8 +602,13 @@ if (orgInputElement){
 // Load in the local file using a FileReader.
 function colCheck_Upload( file ){
 
-    //Clear the old output
+    // Clear the old output
     document.getElementById("col-output").innerHTML = "";
+
+    // Add spinner
+    if (!document.getElementById("col-input").classList.contains('loading')){
+        document.getElementById("col-input").classList.add('loading');
+    }
 
     var reader = new FileReader();
     reader.onload = function( event ){
@@ -635,6 +660,11 @@ function colCheck_Process( filecontents ){
                 "Same Name Multiple Collections → " + duplicates,
                 buildDuplicateList(nameToCollection, "col"));
 
+    // Remove spinner
+    if (document.getElementById("col-input").classList.contains('loading')){
+        document.getElementById("col-input").classList.remove('loading');
+    }
+
 }
 
 var colInputElement = document.getElementById("col-input");
@@ -660,8 +690,13 @@ function comparepubs(one,two){
 // Load in the local file using a FileReader.
 function pubCheck_Upload( file ){
 
-    //Clear the old output
+    // Clear the old output
     document.getElementById("pub-output").innerHTML = "";
+
+    // Add spinner
+    if (!document.getElementById("pub-input").classList.contains('loading')){
+        document.getElementById("pub-input").classList.add('loading');
+    }
 
     var reader = new FileReader();
     reader.onload = function( event ){
@@ -688,10 +723,10 @@ function pubCheck_Process( filecontents ){
 
     var nameToPublication = new Map();
 
-    //store type book w/o identifier with scheme ISBN
+    // store type book w/o identifier with scheme ISBN
     var booksWithoutIdentifierSchemeISBN = [];
 
-    //store type book w/o attachment of type "borrow"
+    // store type book w/o attachment of type "borrow"
     var booksWithoutAttachmentTypeBorrow = [];
 
     for (var publication of objectGenerator(filecontents)){ 
@@ -749,6 +784,11 @@ function pubCheck_Process( filecontents ){
     addOutput("pub-output",
                 "Books with no Attachment of type Borrow → " + booksWithoutAttachmentTypeBorrow.length,
                 buildListWithCatalogueLinks(booksWithoutAttachmentTypeBorrow, comparepubs, "pub"));
+
+    // Remove spinner
+    if (document.getElementById("pub-input").classList.contains('loading')){
+        document.getElementById("pub-input").classList.remove('loading');
+    }
 
 }
 
