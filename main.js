@@ -173,23 +173,24 @@ function addToNameMap( object, map ){
 // create new array of one object.
 // If the object DOI is in the map,
 // push the object to the existing array.
-function addToDOIMap( object, map ){
+function addToDOITypeMap( object, map ){
     if (checkKeyIsValid(object, "identifier")){
         for (var i = 0; i < object.identifier.length; i++){
             var scheme = object.identifier[i].scheme;
             if (scheme === "doi"){
                 var doi = object.identifier[i].value;
-                if (map.has(doi)){
-                    map.get(doi).push(object);
+                var finalKey = object.type + "_" + doi;
+                if (map.has(finalKey)){
+                    map.get(finalKey).push(object);
                 } else {
-                    map.set(doi, [object]);
+                    map.set(finalKey, [object]);
                 }
             }
         }
     }
 }
 
-// Build a ul element from an object of duplicate objects
+// Build a ul element from an map of duplicate objects
 function buildDuplicateList( duplicates, linkcode ){
     var list = document.createElement("ul");
 
@@ -206,6 +207,33 @@ function buildDuplicateList( duplicates, linkcode ){
                 li.appendChild(span);
                 sublist.appendChild(li);
             }
+            item.appendChild(sublist);
+            list.appendChild(item);
+        }
+    }
+    return list;
+}
+
+// Build a ul element from an map of duplicate objects, with type output
+function buildDuplicateListWithType( duplicates, linkcode ){
+    var list = document.createElement("ul");
+
+    for (var value of duplicates.values()){
+        if (value.length >= 2){
+            var item = document.createElement("li");
+            var type = "";
+            var sublist = document.createElement("ul");
+            for (var i = 0; i < value.length; i++){
+                var object = value[i];
+                var li = document.createElement("li");
+                li.appendChild(buildAnchor(object, linkcode));
+                var span = document.createElement("span");
+                span.textContent = "("+object.__id__+")";
+                li.appendChild(span);
+                sublist.appendChild(li);
+                type = object.type;
+            }
+            item.textContent = type;
             item.appendChild(sublist);
             list.appendChild(item);
         }
@@ -733,7 +761,7 @@ function pubCheck_hasContributorRolePublisher( publication ){
 // Find publications that raise red flags.
 function pubCheck_Process( filecontents ){
 
-    var nameToPublication = new Map();
+    var doiAndTypeToPublication = new Map();
 
     // store type book w/o identifier with scheme ISBN
     var booksWithoutIdentifierSchemeISBN = [];
@@ -762,39 +790,23 @@ function pubCheck_Process( filecontents ){
             publication.name = publication.name.substring(0, 50) + "...";
         }
 
-        // Add the publication to the "processed" map under its DOI.
+        // Add the publication to the "processed" map under its DOI and type.
         // A DOI is a unique URL (web address) for that publication.
-        addToDOIMap(publication, nameToPublication);
+        addToDOITypeMap(publication, doiAndTypeToPublication);
 
     }
 
-    // At this point, we have a map called nameToPublication that looks like:
-    // nameToPublication[" A DOI HERE "] -> [ A PUB ]
-    // or
-    // nameToPublication[" A DOI HERE "] -> [ A PUB, ANOTHER PUB ]
-    //
-    // nameToPublication["http://dx.doi.org/10.97/EDE.0000000000000636"][0] =
-    // Object {refereed: "false", __kind__: "Publication", identifier: Array(2), description: Array(1), language: "en"…}
-
-    // We want to know how many DOIs list multiple publications.
-    // If the length of the array under a DOI is greater than or equal to 2,
-    // Artudis has two publications with the same DOI. That's bad! DOIs should be
-    // unique.
-
     // This little loop figures out how many duplicates we're dealing with.
-    // That number is used in the header - Same DOI Multiple Publications → $duplicates
     var duplicates = 0;
-    for (var value of nameToPublication.values()){
+    for (var value of doiAndTypeToPublication.values()){
         if (value.length >= 2){
             duplicates++;
         }
     }
 
-    // `duplicates` is used to build the header.
-    // `buildDuplicateList()` actually builds the HTML list.
     addOutput("pub-output",
-                "Same DOI Multiple Publications → " + duplicates,
-                buildDuplicateList(nameToPublication, "pub"));
+                "Same DOI Multiple Publications of the Same Type→ " + duplicates,
+                buildDuplicateListWithType(doiAndTypeToPublication, "pub"));
 
     addOutput("pub-output",
                 "Books with no ISBN Identifier → " + booksWithoutIdentifierSchemeISBN.length,
