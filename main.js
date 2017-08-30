@@ -717,6 +717,18 @@ function pubCheck_hasAttachmentTypeBorrow( publication ){
     return false;
 }
 
+// Check if an publication has a contributor of role publisher.
+function pubCheck_hasContributorRolePublisher( publication ){
+    if (checkKeyIsValid(publication, "contributor")){
+        for (var i = 0; i < publication.contributor.length; i++){
+            if (publication.contributor[i].role === "publisher"){
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 // Process the contents of the JSON file line by line.
 // Find publications that raise red flags.
 function pubCheck_Process( filecontents ){
@@ -729,12 +741,19 @@ function pubCheck_Process( filecontents ){
     // store type book w/o attachment of type "borrow"
     var booksWithoutAttachmentTypeBorrow = [];
 
+    // store type book or chapter w/o publisher
+    var pubsWithoutContributorRolePublisher = [];
+
     for (var publication of objectGenerator(filecontents)){
 
         // Do checks on publications of type "book"
         if (publication.type === "book"){
             if (!objectCheck_hasIdentifier(publication, "isbn")) booksWithoutIdentifierSchemeISBN.push(publication);
             if (!pubCheck_hasAttachmentTypeBorrow(publication)) booksWithoutAttachmentTypeBorrow.push(publication);
+        }
+        // Do checks on publications of type "book" or "bookChapter"
+        if (publication.type === "book" || publication.type === "bookChapter"){
+            if (!pubCheck_hasContributorRolePublisher(publication)) pubsWithoutContributorRolePublisher.push(publication);
         }
 
         // This stores a concatinated title in the "name" key of the publication.
@@ -784,6 +803,10 @@ function pubCheck_Process( filecontents ){
     addOutput("pub-output",
                 "Books with no Attachment of type Borrow → " + booksWithoutAttachmentTypeBorrow.length,
                 buildListWithCatalogueLinks(booksWithoutAttachmentTypeBorrow, comparepubs, "pub"));
+
+    addOutput("pub-output",
+                "Books or Book Chapters with no contributor of role publisher  → " + pubsWithoutContributorRolePublisher.length,
+                buildList(pubsWithoutContributorRolePublisher, comparepubs, "pub"));
 
     // Remove spinner
     if (document.getElementById("pub-input").classList.contains('loading')){

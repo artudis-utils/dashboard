@@ -452,3 +452,36 @@ QUnit.test( "pubCheck_hasAttachmentTypeBorrow", function( assert ) {
     assert.notOk(pubCheck_hasAttachmentTypeBorrow(noAttachment), "return false since pub has no attachment");
 
 });
+
+QUnit.test( "pubCheck_hasContributorRolePublisher", function( assert ) {
+
+    hasContributorRolePublisher = {
+        "contributor": [
+            {
+                "role":"somesuch"
+            },
+            {
+                "role":"publisher"
+            }
+        ]
+    }
+    assert.ok(pubCheck_hasContributorRolePublisher(hasContributorRolePublisher), "return true since pub has contributor with role publisher");
+
+    hasContributorRoleNotPublisher = {
+        "contributor": [
+            {
+                "role":"notpublisher"
+            }
+        ]
+    }
+    assert.notOk(pubCheck_hasContributorRolePublisher(hasContributorRoleNotPublisher), "return false since pub has contributor with role != publisher");
+
+    emptyContributor = {
+        "contributor": []
+    }
+    assert.notOk(pubCheck_hasContributorRolePublisher(emptyContributor), "return false since pub has empty contributor");
+
+    noContributor = {}
+    assert.notOk(pubCheck_hasContributorRolePublisher(noContributor), "return false since pub has no contributor");
+
+});
