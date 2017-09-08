@@ -167,29 +167,6 @@ function addToNameMap( object, map ){
     }
 }
 
-// Add an object to a map.
-// DOI -> [object(,object...)]
-// If the object DOI isn't in the map,
-// create new array of one object.
-// If the object DOI is in the map,
-// push the object to the existing array.
-function addToDOITypeMap( object, map ){
-    if (checkKeyIsValid(object, "identifier")){
-        for (var i = 0; i < object.identifier.length; i++){
-            var scheme = object.identifier[i].scheme;
-            if (scheme === "doi"){
-                var doi = object.identifier[i].value;
-                var finalKey = object.type + "_" + doi;
-                if (map.has(finalKey)){
-                    map.get(finalKey).push(object);
-                } else {
-                    map.set(finalKey, [object]);
-                }
-            }
-        }
-    }
-}
-
 // Build a ul element from an map of duplicate objects
 function buildDuplicateList( duplicates, linkcode ){
     var list = document.createElement("ul");
@@ -704,6 +681,24 @@ if ( colInputElement ){
 }
 
 // ----- Publications -----
+
+// Add an object to a map.
+function addToDOITypeMap( object, map ){
+    if (checkKeyIsValid(object, "identifier")){
+        for (var i = 0; i < object.identifier.length; i++){
+            var scheme = object.identifier[i].scheme;
+            if (scheme === "doi"){
+                var doi = object.identifier[i].value;
+                var finalKey = object.type + "_" + doi;
+                if (map.has(finalKey)){
+                    map.get(finalKey).push(object);
+                } else {
+                    map.set(finalKey, [object]);
+                }
+            }
+        }
+    }
+}
 
 // Compare publications for sorting
 function comparepubs( one,two ){
