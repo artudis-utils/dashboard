@@ -829,3 +829,73 @@ if (pubInputElement){
         this.value = "";
     };
 }
+
+// ----- Concepts -----
+
+// Load in the local file using a FileReader.
+function conceptCheck_Upload( file ){
+
+    // Clear the old output
+    document.getElementById("concept-output").innerHTML = "";
+
+    // Add spinner
+    if (!document.getElementById("concept-input").classList.contains('loading')){
+        document.getElementById("concept-input").classList.add('loading');
+    }
+
+    var reader = new FileReader();
+    reader.onload = function( event ){
+        conceptCheck_Process(event.target.result);
+    };
+    reader.readAsText(file);
+}
+
+// Process the contents of the JSON file line by line.
+// Find concepts that raise red flags.
+function conceptCheck_Process( filecontents ){
+
+    var schemeAndNotationToConcept = new Map();
+
+    for (var concept of objectGenerator(filecontents)){
+
+        var schemeAndNotation = concept.scheme + "-" + concept.notation;
+
+        concept.name = schemeAndNotation + " " + concept.name;
+        if (concept.name.length > 50){
+            concept.name = concept.name.substring(0, 50) + "...";
+        }
+
+        if (schemeAndNotationToConcept.has(schemeAndNotation)){
+            schemeAndNotationToConcept.get(schemeAndNotation).push(concept);
+        } else {
+            schemeAndNotationToConcept.set(schemeAndNotation, [concept]);
+        }
+
+    }
+
+    // This little loop figures out how many duplicates we're dealing with.
+    var duplicates = 0;
+    for (var value of schemeAndNotationToConcept.values()){
+        if (value.length >= 2){
+            duplicates++;
+        }
+    }
+
+    addOutput("concept-output",
+                "Same Scheme and Notation→ " + duplicates,
+                buildDuplicateList(schemeAndNotationToConcept, "concept"));
+
+    // Remove spinner
+    if (document.getElementById("concept-input").classList.contains('loading')){
+        document.getElementById("concept-input").classList.remove('loading');
+    }
+
+}
+
+var conceptInputElement = document.getElementById("concept-input");
+if (conceptInputElement){
+    conceptInputElement.onchange = function(){
+        conceptCheck_Upload(this.files[0]);
+        this.value = "";
+    };
+}
