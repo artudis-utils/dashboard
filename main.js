@@ -284,6 +284,68 @@ function comparepeople( one,two ){
     return 0;
 }
 
+// Compare org label for sorting
+function compareorgs( one,two ){
+
+    var orgLabelOne = one[0];
+    var orgLabelTwo = two[0];
+
+    if (orgLabelOne.startsWith('@Organisation:')){
+        orgLabelOne = parseInt(orgLabelOne.split(':')[1]);
+    }
+
+    if (orgLabelTwo.startsWith('@Organisation:')){
+        orgLabelTwo = parseInt(orgLabelTwo.split(':')[1]);
+    }
+
+    if (orgLabelOne === "None")
+    	orgLabelOne = 0;
+    if (orgLabelTwo === "None")
+    	orgLabelTwo = 0;
+
+    if (orgLabelOne < orgLabelTwo)
+        return -1;
+    if (orgLabelOne > orgLabelTwo)
+        return 1;
+    return 0;
+}
+
+
+// Add an object to a map.
+// employerorg -> [person(,person...)]
+function addToEmployerMap( person, map ){
+    if (personCheck_hasEmployer(person)){
+        for (var i = 0; i < person.affiliation.length; i++){
+            var affiliation = person.affiliation[i];
+            if (affiliation.role === "employer" ){
+                if (map.has(affiliation.organisation)){
+                    map.get(affiliation.organisation).push(person);
+                } else {
+                    map.set(affiliation.organisation, [person]);
+                }
+                break;
+            }
+        }
+    } else {
+        if (map.has("None")){
+            map.get("None").push(person);
+        } else {
+            map.set("None", [person]);
+        }
+    }
+}
+
+function buildListSortedEmployers( employersToPeopleMap, sublistfunc, comparefunc, linkcode ){
+    var list = document.createElement("ul");
+    for (var key of employersToPeopleMap.keys()){
+        var item = document.createElement("li");
+        item.textContent = key;        
+        item.appendChild(sublistfunc(employersToPeopleMap.get(key), comparefunc, linkcode));        
+        list.appendChild(item);
+    }
+    return list;
+}
+
 // Load in the local file using a FileReader.
 function personCheck_Upload( file ){
 
@@ -384,6 +446,8 @@ function personCheck_Process( filecontents ){
 
     var nameToPeople = new Map();
 
+    var employerToPeopleWithDuplicateIdentifiers = new Map();
+
     for (var person of objectGenerator(filecontents)){
 
         person.name = person.family_name + ", " + person.given_name;
@@ -396,6 +460,7 @@ function personCheck_Process( filecontents ){
         person.labels = objectCheck_duplicateIdentifiers(person);
         if (person.labels.length > 0){
             withDuplicateIdentifiers.push(person);
+            addToEmployerMap(person, employerToPeopleWithDuplicateIdentifiers);
         }
 
         if (!objectCheck_hasIdentifier(person, "orcid")) withoutORCID.push(person);
@@ -403,6 +468,8 @@ function personCheck_Process( filecontents ){
 
         addToNameMap(person, nameToPeople);
     }
+
+    employerToPeopleWithDuplicateIdentifiers = new Map([...employerToPeopleWithDuplicateIdentifiers.entries()].sort(compareorgs));
 
     addOutput("person-output",
                 "People without a Work Website Contact → " + withoutWorkURL.length,
@@ -424,7 +491,7 @@ function personCheck_Process( filecontents ){
 
     addOutput("person-output",
                 "People with Duplicate Identifier Schemes → " + withDuplicateIdentifiers.length,
-                buildListWithLabels(withDuplicateIdentifiers, comparepeople, "ppl"));
+                buildListSortedEmployers(employerToPeopleWithDuplicateIdentifiers, buildListWithLabels, comparepeople, "ppl"));
 
     if (document.getElementById("person_noorcid").checked){
         addOutput("person-output",

@@ -86,6 +86,9 @@ header p {
     padding-left: 25px;
     margin-top: 0px;
 }
+.checkoutput ul ul {
+    margin-top: 0.4rem;
+}
 
 .checkoutput h3 {
     margin-top: 0px;
