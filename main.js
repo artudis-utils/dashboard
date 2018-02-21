@@ -416,6 +416,7 @@ function personCheck_Process( filecontents ){
     var withDuplicateIdentifiers = [];
     var withoutORCID = [];
     var withExposureNoLink = [];
+    var withoutISNIwithYoutube = [];
 
     var nameToPeople = new Map();
 
@@ -438,6 +439,8 @@ function personCheck_Process( filecontents ){
 
         if (!objectCheck_hasIdentifier(person, "orcid")) withoutORCID.push(person);
         if (!personCheck_exposureAllEntityLink(person)) withExposureNoLink.push(person);
+        if ((!objectCheck_hasIdentifier(person, "isni")) && 
+            (objectCheck_hasIdentifier(person, "youtube") || objectCheck_hasIdentifier(person, "youtube_channel"))) withoutISNIwithYoutube.push(person);
 
         addToNameMap(person, nameToPeople);
     }
@@ -475,6 +478,10 @@ function personCheck_Process( filecontents ){
     addOutput("person-output",
                 "People with Exposures that don't link to an Org, Event, or Achievement → " + withExposureNoLink.length,
                 buildList(withExposureNoLink, comparepeople, "ppl"));
+
+    addOutput("person-output",
+                "People with Youtube channels but no ISNI → " + withoutISNIwithYoutube.length,
+                buildList(withoutISNIwithYoutube, comparepeople, "ppl"));
 
     var duplicates = 0;
     for (var value of nameToPeople.values()){
@@ -519,9 +526,9 @@ function compareorgs( one,two ){
     }
 
     if (orgLabelOne === "None")
-    	orgLabelOne = 0;
+        orgLabelOne = 0;
     if (orgLabelTwo === "None")
-    	orgLabelTwo = 0;
+        orgLabelTwo = 0;
 
     if (orgLabelOne < orgLabelTwo)
         return -1;
