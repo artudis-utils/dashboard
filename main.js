@@ -593,6 +593,7 @@ function orgCheck_Process( filecontents ){
     var withoutScopusID = [];
     var withoutRinggoldID = [];
     var withoutISNI = [];
+    var withoutISNIwithYoutube = [];
 
     var nameToOrg = new Map();
 
@@ -610,6 +611,7 @@ function orgCheck_Process( filecontents ){
         if (!objectCheck_hasIdentifier(org, "scopus")) withoutScopusID.push(org);
         if (!objectCheck_hasIdentifier(org, "ringgoldid")) withoutRinggoldID.push(org);
         if (!objectCheck_hasIdentifier(org, "isni")) withoutISNI.push(org);
+        if ((!objectCheck_hasIdentifier(org, "isni")) && objectCheck_hasIdentifier(org, "youtube")) withoutISNIwithYoutube.push(org);
 
         addToNameMap(org, nameToOrg);
     }
@@ -637,6 +639,10 @@ function orgCheck_Process( filecontents ){
     addOutput("org-output",
                 "Organizations without ISNI → " + withoutISNI.length,
                 buildList(withoutISNI, compareByName, "org"));
+
+    addOutput("org-output",
+                "Organizations without ISNI, with Youtube → " + withoutISNIwithYoutube.length,
+                buildList(withoutISNIwithYoutube, compareByName, "org"));
 
     addOutput("org-output",
                 "Organizations without a description → " + withoutDescriptions.length,
