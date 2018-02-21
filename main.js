@@ -721,10 +721,15 @@ function colCheck_Process( filecontents ){
     var nameToCollection = new Map();
 
     var withoutPublisher = [];
+    var journalWithoutXSSN = [];
 
     for (var col of objectGenerator(filecontents)){
 
         if (!colCheck_hasPublisher(col)) withoutPublisher.push(col);
+        if (checkKeyIsValid(col, "type") && 
+            col.type == "journal" && 
+            (!objectCheck_hasIdentifier(col, "issn")) &&
+            (!objectCheck_hasIdentifier(col, "essn"))) journalWithoutXSSN.push(col);
 
         addToNameMap(col, nameToCollection);
     }
@@ -732,6 +737,10 @@ function colCheck_Process( filecontents ){
     addOutput("col-output",
                 "Collections without a publisher → " + withoutPublisher.length,
                 buildList(withoutPublisher, compareByName, "col"));
+
+    addOutput("col-output",
+                "Journals without an ISSN or ESSN → " + journalWithoutXSSN.length,
+                buildList(journalWithoutXSSN, compareByName, "col"));
 
     var duplicates = 0;
     for (var value of nameToCollection.values()){
