@@ -284,33 +284,6 @@ function comparepeople( one,two ){
     return 0;
 }
 
-// Compare org label for sorting
-function compareorgs( one,two ){
-
-    var orgLabelOne = one[0];
-    var orgLabelTwo = two[0];
-
-    if (orgLabelOne.startsWith('@Organisation:')){
-        orgLabelOne = parseInt(orgLabelOne.split(':')[1]);
-    }
-
-    if (orgLabelTwo.startsWith('@Organisation:')){
-        orgLabelTwo = parseInt(orgLabelTwo.split(':')[1]);
-    }
-
-    if (orgLabelOne === "None")
-    	orgLabelOne = 0;
-    if (orgLabelTwo === "None")
-    	orgLabelTwo = 0;
-
-    if (orgLabelOne < orgLabelTwo)
-        return -1;
-    if (orgLabelOne > orgLabelTwo)
-        return 1;
-    return 0;
-}
-
-
 // Add an object to a map.
 // employerorg -> [person(,person...)]
 function addToEmployerMap( person, map ){
@@ -530,6 +503,32 @@ if (personInputElement){
 }
 
 // ----- Organizations -----
+
+// Compare org label for sorting
+function compareorgs( one,two ){
+
+    var orgLabelOne = one[0];
+    var orgLabelTwo = two[0];
+
+    if (orgLabelOne.startsWith('@Organisation:')){
+        orgLabelOne = parseInt(orgLabelOne.split(':')[1]);
+    }
+
+    if (orgLabelTwo.startsWith('@Organisation:')){
+        orgLabelTwo = parseInt(orgLabelTwo.split(':')[1]);
+    }
+
+    if (orgLabelOne === "None")
+    	orgLabelOne = 0;
+    if (orgLabelTwo === "None")
+    	orgLabelTwo = 0;
+
+    if (orgLabelOne < orgLabelTwo)
+        return -1;
+    if (orgLabelOne > orgLabelTwo)
+        return 1;
+    return 0;
+}
 
 // Load in the local file using a FileReader.
 function orgCheck_Upload( file ){
