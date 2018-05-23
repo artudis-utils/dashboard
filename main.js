@@ -589,6 +589,46 @@ function orgCheck_hasRelation( org ){
     return false;
 }
 
+// Create a map of orgs to scopus IDs
+function orgNameToScopusIDs( object, map ){
+    if (objectCheck_hasIdentifier(object, "scopus")){
+        for (var i = 0; i < object.identifier.length; i++){
+            var scheme = object.identifier[i].scheme;
+            var value = object.identifier[i].value;
+            if (scheme === "scopus" && value !== "undefined" && value.length > 0){
+                if (map.has(object)){
+                    map.get(object).push(value);
+                } else {
+                    map.set(object, [value]);
+                }
+            }
+        }
+    }
+}
+
+// Build a ul element from an Org map of names to ScoupsIDs 
+function buildOrgToScopusIDsList( map, linkcode ){
+    var list = document.createElement("ul");
+    for (var [key, value] of map){
+        var item = document.createElement("li");
+        item.appendChild(buildAnchor(key, linkcode));
+        var sublist = document.createElement("ul");
+        for (var i = 0; i < value.length; i++){
+            var id = value[i];
+            var li = document.createElement("li");
+            var a = document.createElement("a");
+            a.textContent = id;
+            a.setAttribute("href", "https://www.scopus.com/affil/profile.uri?afid=" + id);
+            a.setAttribute("target", "_blank");
+            li.appendChild(a);
+            sublist.appendChild(li);
+        }
+        item.appendChild(sublist);
+        list.appendChild(item);
+    }
+    return list;
+}
+
 // Process the contents of the JSON file line by line.
 // Find orgs which raise red flags.
 function orgCheck_Process( filecontents ){
@@ -603,6 +643,7 @@ function orgCheck_Process( filecontents ){
     var withoutISNIwithYoutube = [];
 
     var nameToOrg = new Map();
+    var nameToScopus = new Map();
 
     for (var org of objectGenerator(filecontents)){
 
@@ -621,6 +662,7 @@ function orgCheck_Process( filecontents ){
         if ((!objectCheck_hasIdentifier(org, "isni")) && objectCheck_hasIdentifier(org, "youtube")) withoutISNIwithYoutube.push(org);
 
         addToNameMap(org, nameToOrg);
+        orgNameToScopusIDs(org, nameToScopus);
     }
 
     addOutput("org-output",
@@ -665,6 +707,10 @@ function orgCheck_Process( filecontents ){
     addOutput("org-output",
                 "Same Name Multiple Organizations → " + duplicates,
                 buildDuplicateList(nameToOrg, "org"));
+
+    addOutput("org-output",
+                "Organizations scopus IDs → " + nameToScopus.size,
+                buildOrgToScopusIDsList(nameToScopus, "org"));
 
     // Remove spinner
     if (document.getElementById("org-input").classList.contains('loading')){
