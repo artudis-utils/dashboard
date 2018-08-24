@@ -192,6 +192,7 @@ function buildDuplicateList( duplicates, linkcode ){
 }
 
 // Build a ul element from an map of duplicate objects, with type output
+// and Scopus publication ID
 function buildDuplicateListWithType( duplicates, linkcode ){
     var list = document.createElement("ul");
 
@@ -205,7 +206,17 @@ function buildDuplicateListWithType( duplicates, linkcode ){
                 var li = document.createElement("li");
                 li.appendChild(buildAnchor(object, linkcode));
                 var span = document.createElement("span");
-                span.textContent = "("+object.__id__+")";
+                if (objectCheck_hasIdentifier(object, "scopus")){
+                    var scopusID = ""
+                    for (var j = 0; j < object.identifier.length; j++){
+                       if (object.identifier[j].scheme === "scopus"){
+                           scopusID = object.identifier[j].value;
+                       }
+                    }
+                    span.textContent = "("+scopusID+")";
+                } else {
+                    span.textContent = "("+object.__id__+")";
+                }
                 li.appendChild(span);
                 sublist.appendChild(li);
                 type = object.type;
@@ -312,8 +323,8 @@ function buildListSortedEmployers( employersToPeopleMap, sublistfunc, comparefun
     var list = document.createElement("ul");
     for (var key of employersToPeopleMap.keys()){
         var item = document.createElement("li");
-        item.textContent = key;        
-        item.appendChild(sublistfunc(employersToPeopleMap.get(key), comparefunc, linkcode));        
+        item.textContent = key;
+        item.appendChild(sublistfunc(employersToPeopleMap.get(key), comparefunc, linkcode));
         list.appendChild(item);
     }
     return list;
@@ -439,7 +450,7 @@ function personCheck_Process( filecontents ){
 
         if (!objectCheck_hasIdentifier(person, "orcid")) withoutORCID.push(person);
         if (!personCheck_exposureAllEntityLink(person)) withExposureNoLink.push(person);
-        if ((!objectCheck_hasIdentifier(person, "isni")) && 
+        if ((!objectCheck_hasIdentifier(person, "isni")) &&
             (objectCheck_hasIdentifier(person, "youtube") || objectCheck_hasIdentifier(person, "youtube_channel"))) withoutISNIwithYoutube.push(person);
 
         addToNameMap(person, nameToPeople);
@@ -606,7 +617,7 @@ function orgNameToScopusIDs( object, map ){
     }
 }
 
-// Build a ul element from an Org map of names to ScoupsIDs 
+// Build a ul element from an Org map of names to ScoupsIDs
 function buildOrgToScopusIDsList( map, linkcode ){
     var list = document.createElement("ul");
     for (var [key, value] of map){
@@ -772,8 +783,8 @@ function colCheck_Process( filecontents ){
     for (var col of objectGenerator(filecontents)){
 
         if (!colCheck_hasPublisher(col)) withoutPublisher.push(col);
-        if (checkKeyIsValid(col, "type") && 
-            col.type == "journal" && 
+        if (checkKeyIsValid(col, "type") &&
+            col.type == "journal" &&
             (!objectCheck_hasIdentifier(col, "issn")) &&
             (!objectCheck_hasIdentifier(col, "essn"))) journalWithoutXSSN.push(col);
 
@@ -934,7 +945,7 @@ function pubCheck_Process( filecontents ){
     }
 
     addOutput("pub-output",
-                "Same DOI Multiple Publications of the Same Type→ " + duplicates,
+                "Same DOI Multiple Publications of the Same Type (Scopus ID)→ " + duplicates,
                 buildDuplicateListWithType(doiAndTypeToPublication, "pub"));
 
     addOutput("pub-output",
