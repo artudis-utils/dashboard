@@ -153,6 +153,17 @@ function buildListWithCatalogueLinks( objects, comparefunc, linkcode ){
     return list;
 }
 
+// Build a ul element from a map of strings to integers.
+function buildListFromStringIntMap( map ){
+    var list = document.createElement("ul");
+    for (var [key, value] of map) {
+        var li = document.createElement("li");
+        li.textContent = key + " - " + value;
+        list.appendChild(li);
+    }
+    return list;
+}
+
 // Add an object to a map.
 // name -> [object(,object...)]
 // If the object name isn't in the map,
@@ -207,7 +218,7 @@ function buildDuplicateListWithType( duplicates, linkcode ){
                 li.appendChild(buildAnchor(object, linkcode));
                 var span = document.createElement("span");
                 if (objectCheck_hasIdentifier(object, "scopus")){
-                    var scopusID = ""
+                    var scopusID = "";
                     for (var j = 0; j < object.identifier.length; j++){
                        if (object.identifier[j].scheme === "scopus"){
                            scopusID = object.identifier[j].value;
@@ -784,7 +795,7 @@ function colCheck_Process( filecontents ){
 
         if (!colCheck_hasPublisher(col)) withoutPublisher.push(col);
         if (checkKeyIsValid(col, "type") &&
-            col.type == "journal" &&
+            col.type === "journal" &&
             (!objectCheck_hasIdentifier(col, "issn")) &&
             (!objectCheck_hasIdentifier(col, "essn"))) journalWithoutXSSN.push(col);
 
@@ -912,6 +923,21 @@ function pubCheck_Process( filecontents ){
     // store type book or chapter w/o publisher
     var pubsWithoutContributorRolePublisher = [];
 
+    // store map of type to number of attachments
+    var typeToNumberAttachments = new Map();
+
+    // store total number of attachments
+    var totalNumberAttachments = 0;
+
+    // store map of type to size of attachments
+    var typeToAttachmentSize = new Map();
+
+    // store total size of attachments
+    var totalSizeOfAttachments = 0;
+
+    // store file format to number of attachments of that format
+    var fileFormatToFormatCount = new Map();
+
     for (var publication of objectGenerator(filecontents)){
 
         // Do checks on publications of type "book"
@@ -930,6 +956,42 @@ function pubCheck_Process( filecontents ){
             publication.name = publication.name.substring(0, 50) + "...";
         }
 
+        // Work with attachments to gather statistics for reporting.
+        if (checkKeyIsValid(publication, "attachment")){
+            for (var i = 0; i < publication.attachment.length; i++){
+
+                // Count the number of attachments per publication type.
+                if (typeToNumberAttachments.has(publication.type)){
+                    typeToNumberAttachments.set(publication.type,
+                        typeToNumberAttachments.get(publication.type)+1);
+                } else {
+                    typeToNumberAttachments.set(publication.type, 1);
+                }
+
+                // Count the total number of attachments to publications.
+                totalNumberAttachments++;
+
+                // Count the bytes per publication type
+                if (typeToAttachmentSize.has(publication.type)){
+                    typeToAttachmentSize.set(publication.type,
+                        typeToAttachmentSize.get(publication.type)+parseInt(publication.attachment[i].bytes, 10));
+                } else {
+                    typeToAttachmentSize.set(publication.type, parseInt(publication.attachment[i].bytes, 10));
+                }
+
+                // Count the number of bytes in total.
+                totalSizeOfAttachments += parseInt(publication.attachment[i].bytes, 10);
+
+                // Count the number of attachments per file type.
+                if (fileFormatToFormatCount.has(publication.attachment[i].format)){
+                    fileFormatToFormatCount.set(publication.attachment[i].format,
+                        fileFormatToFormatCount.get(publication.attachment[i].format)+1);
+                } else {
+                    fileFormatToFormatCount.set(publication.attachment[i].format, 1);
+                }
+            }
+        }
+
         // Add the publication to the "processed" map under its DOI and type.
         // A DOI is a unique URL (web address) for that publication.
         addToDOITypeMap(publication, doiAndTypeToPublication);
@@ -944,8 +1006,29 @@ function pubCheck_Process( filecontents ){
         }
     }
 
+    addOutput("pub-output", "Publication type to Number of Attachments →",
+              buildListFromStringIntMap(typeToNumberAttachments));
+
+    var totalNumberAttachmentsElement = document.createElement('span');
+    totalNumberAttachmentsElement.textContent = totalNumberAttachments;
+
+    addOutput("pub-output", "Total number of attachments →",
+              totalNumberAttachmentsElement);
+
+    addOutput("pub-output", "Publication type to total attachment size →",
+              buildListFromStringIntMap(typeToAttachmentSize));
+
+    var totalSizeOfAttachmentsElement = document.createElement('span');
+    totalSizeOfAttachmentsElement.textContent = totalSizeOfAttachments;
+
+    addOutput("pub-output", "Total size of attachments →",
+              totalSizeOfAttachmentsElement);
+
+    addOutput("pub-output", "Attachment file formats →",
+              buildListFromStringIntMap(fileFormatToFormatCount));
+
     addOutput("pub-output",
-                "Same DOI Multiple Publications of the Same Type (Scopus ID)→ " + duplicates,
+                "Same DOI Multiple Publications of the Same Type (Scopus ID) → " + duplicates,
                 buildDuplicateListWithType(doiAndTypeToPublication, "pub"));
 
     addOutput("pub-output",
@@ -957,7 +1040,7 @@ function pubCheck_Process( filecontents ){
                 buildListWithCatalogueLinks(booksWithoutAttachmentTypeBorrow, comparepubs, "pub"));
 
     addOutput("pub-output",
-                "Books or Book Chapters with no contributor of role publisher  → " + pubsWithoutContributorRolePublisher.length,
+                "Books or Book Chapters with no contributor of role publisher → " + pubsWithoutContributorRolePublisher.length,
                 buildList(pubsWithoutContributorRolePublisher, comparepubs, "pub"));
 
     // Remove spinner
