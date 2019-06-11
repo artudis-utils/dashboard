@@ -164,6 +164,18 @@ function buildListFromStringIntMap( map ){
     return list;
 }
 
+// Build a ul element from a map of strings to integers (representing bytes)
+function buildListFromStringIntMapBytes( map ){
+    var list = document.createElement("ul");
+    for (var [key, value] of map) {
+        var li = document.createElement("li");
+        li.textContent = key + " - " + (value / 1073741824).toFixed(2) + " GB";
+        li.title = value + " bytes";
+        list.appendChild(li);
+    }
+    return list;
+}
+
 // Add an object to a map.
 // name -> [object(,object...)]
 // If the object name isn't in the map,
@@ -923,6 +935,9 @@ function pubCheck_Process( filecontents ){
     // store type book or chapter w/o publisher
     var pubsWithoutContributorRolePublisher = [];
 
+    // store total number of publications
+    var totalNumberPubs = 0;
+
     // store map of type to number of attachments
     var typeToNumberAttachments = new Map();
 
@@ -956,6 +971,9 @@ function pubCheck_Process( filecontents ){
             publication.name = publication.name.substring(0, 50) + "...";
         }
 
+        // Count the total number of publications.
+        totalNumberPubs++;
+
         // Work with attachments to gather statistics for reporting.
         if (checkKeyIsValid(publication, "attachment")){
             for (var i = 0; i < publication.attachment.length; i++){
@@ -971,16 +989,20 @@ function pubCheck_Process( filecontents ){
                 // Count the total number of attachments to publications.
                 totalNumberAttachments++;
 
-                // Count the bytes per publication type
-                if (typeToAttachmentSize.has(publication.type)){
-                    typeToAttachmentSize.set(publication.type,
-                        typeToAttachmentSize.get(publication.type)+parseInt(publication.attachment[i].bytes, 10));
-                } else {
-                    typeToAttachmentSize.set(publication.type, parseInt(publication.attachment[i].bytes, 10));
-                }
+                // Only do work on the bytes if valid
+                var bytes = parseInt(publication.attachment[i].bytes, 10)
+                if (!isNaN(bytes) && bytes > 0) {
+                    // Count the bytes per publication type
+                    if (typeToAttachmentSize.has(publication.type)){
+                        typeToAttachmentSize.set(publication.type,
+                            typeToAttachmentSize.get(publication.type)+bytes);
+                    } else {
+                        typeToAttachmentSize.set(publication.type, bytes);
+                    }
 
-                // Count the number of bytes in total.
-                totalSizeOfAttachments += parseInt(publication.attachment[i].bytes, 10);
+                    // Count the number of bytes in total.
+                    totalSizeOfAttachments += bytes;
+                }
 
                 // Count the number of attachments per file type.
                 if (fileFormatToFormatCount.has(publication.attachment[i].format)){
@@ -1006,23 +1028,33 @@ function pubCheck_Process( filecontents ){
         }
     }
 
-    addOutput("pub-output", "Publication type to Number of Attachments →",
-              buildListFromStringIntMap(typeToNumberAttachments));
+    // Output total number of publications
+    var totalNumberPubsElement = document.createElement('span');
+    totalNumberPubsElement.textContent = totalNumberPubs;
 
+    addOutput("pub-output", "Number of Publications →",
+              totalNumberPubsElement);
+
+    // Output total number of attachments
     var totalNumberAttachmentsElement = document.createElement('span');
     totalNumberAttachmentsElement.textContent = totalNumberAttachments;
 
     addOutput("pub-output", "Total number of attachments →",
               totalNumberAttachmentsElement);
 
-    addOutput("pub-output", "Publication type to total attachment size →",
-              buildListFromStringIntMap(typeToAttachmentSize));
-
+    // Output total size of attachments
     var totalSizeOfAttachmentsElement = document.createElement('span');
-    totalSizeOfAttachmentsElement.textContent = totalSizeOfAttachments;
+    totalSizeOfAttachmentsElement.textContent = (totalSizeOfAttachments / 1073741824).toFixed(2) + " GB";
+    totalSizeOfAttachmentsElement.title = totalSizeOfAttachments + " bytes";
 
     addOutput("pub-output", "Total size of attachments →",
               totalSizeOfAttachmentsElement);
+
+    addOutput("pub-output", "Publication type to Number of Attachments →",
+              buildListFromStringIntMap(typeToNumberAttachments));
+
+    addOutput("pub-output", "Publication type to total attachment size →",
+              buildListFromStringIntMapBytes(typeToAttachmentSize));
 
     addOutput("pub-output", "Attachment file formats →",
               buildListFromStringIntMap(fileFormatToFormatCount));
