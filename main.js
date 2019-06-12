@@ -947,6 +947,9 @@ function pubCheck_Process( filecontents ){
     // store map of type to size of attachments
     var typeToAttachmentSize = new Map();
 
+    // store map of open access status to number of attachments
+    var openAccessToNumberOfAttachments = new Map();
+
     // store total size of attachments
     var totalSizeOfAttachments = 0;
 
@@ -984,6 +987,16 @@ function pubCheck_Process( filecontents ){
                         typeToNumberAttachments.get(publication.type)+1);
                 } else {
                     typeToNumberAttachments.set(publication.type, 1);
+                }
+
+                // Classify the attachment by open access, external url, blob key, positive bytes
+                var oaClassifier = "oa:" + publication.attachment[i].open_access + "-";
+                oaClassifier += "link:" + (publication.attachment[i].external_url!==null) + "-";
+                oaClassifier += "file:" + (publication.attachment[i].blob_key!==null);
+                if (openAccessToNumberOfAttachments.has(oaClassifier)){
+                    openAccessToNumberOfAttachments.set(oaClassifier, openAccessToNumberOfAttachments.get(oaClassifier)+1);
+                } else {
+                    openAccessToNumberOfAttachments.set(oaClassifier, 1);
                 }
 
                 // Count the total number of attachments to publications.
@@ -1052,6 +1065,9 @@ function pubCheck_Process( filecontents ){
 
     addOutput("pub-output", "Publication type to Number of Attachments →",
               buildListFromStringIntMap(typeToNumberAttachments));
+
+    addOutput("pub-output", "Open Access and File Access to Number of Attachments →",
+              buildListFromStringIntMap(openAccessToNumberOfAttachments));
 
     addOutput("pub-output", "Publication type to total attachment size →",
               buildListFromStringIntMapBytes(typeToAttachmentSize));
