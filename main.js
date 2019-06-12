@@ -990,7 +990,7 @@ function pubCheck_Process( filecontents ){
                 totalNumberAttachments++;
 
                 // Only do work on the bytes if valid
-                var bytes = parseInt(publication.attachment[i].bytes, 10)
+                var bytes = parseInt(publication.attachment[i].bytes, 10);
                 if (!isNaN(bytes) && bytes > 0) {
                     // Count the bytes per publication type
                     if (typeToAttachmentSize.has(publication.type)){
