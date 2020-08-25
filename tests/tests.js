@@ -485,3 +485,36 @@ QUnit.test( "pubCheck_hasContributorRolePublisher", function( assert ) {
     assert.notOk(pubCheck_hasContributorRolePublisher(noContributor), "return false since pub has no contributor");
 
 });
+
+QUnit.test( "pubCheck_hasRelationRoleSeeAlso", function( assert ) {
+
+    hasRelationRoleSeeAlso = {
+        "relation": [
+            {
+                "role":"seeAlso"
+            },
+            {
+                "role":"publisher"
+            }
+        ]
+    }
+    assert.ok(pubCheck_hasRelationRoleSeeAlso(hasRelationRoleSeeAlso), "return true since pub has relation with role seeAlso");
+
+    hasRelationRoleNotSeeAlso = {
+        "relation": [
+            {
+                "role":"overhere"
+            }
+        ]
+    }
+    assert.notOk(pubCheck_hasRelationRoleSeeAlso(hasRelationRoleNotSeeAlso), "return false since pub has relation with role != seeAlso");
+
+    emptyRelation = {
+        "relation": []
+    }
+    assert.notOk(pubCheck_hasRelationRoleSeeAlso(emptyContributor), "return false since pub has empty relation");
+
+    noRelation = {}
+    assert.notOk(pubCheck_hasRelationRoleSeeAlso(noContributor), "return false since pub has no relation");
+
+});

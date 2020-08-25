@@ -920,6 +920,18 @@ function pubCheck_hasContributorRolePublisher( publication ){
     return false;
 }
 
+// Check if an publication has a relation of role seeAlso.
+function pubCheck_hasRelationRoleSeeAlso( publication ){
+    if (checkKeyIsValid(publication, "relation")){
+        for (var i = 0; i < publication.relation.length; i++){
+            if (publication.relation[i].role === "seeAlso"){
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 // Process the contents of the JSON file line by line.
 // Find publications that raise red flags.
 function pubCheck_Process( filecontents ){
@@ -955,6 +967,9 @@ function pubCheck_Process( filecontents ){
 
     // store file format to number of attachments of that format
     var fileFormatToFormatCount = new Map();
+
+    // store pubs with title prefix 'erratum' with no seeAlso relation
+    var pubsTitlePrefixErratumWithoutSeeAlso = [];
 
     for (var publication of objectGenerator(filecontents)){
 
@@ -1027,6 +1042,13 @@ function pubCheck_Process( filecontents ){
             }
         }
 
+        // Check the title prefix for 'erratum'
+        if (publication.title.toLowerCase().startsWith('erratum')) {
+            if(!pubCheck_hasRelationRoleSeeAlso(publication)) {
+                pubsTitlePrefixErratumWithoutSeeAlso.push(publication);
+            }
+        }
+
         // Add the publication to the "processed" map under its DOI and type.
         // A DOI is a unique URL (web address) for that publication.
         addToDOITypeMap(publication, doiAndTypeToPublication);
@@ -1090,6 +1112,10 @@ function pubCheck_Process( filecontents ){
     addOutput("pub-output",
                 "Books or Book Chapters with no contributor of role publisher → " + pubsWithoutContributorRolePublisher.length,
                 buildList(pubsWithoutContributorRolePublisher, comparepubs, "pub"));
+
+    addOutput("pub-output",
+                "Publications with title prefix 'erratum' with no seeAlso relation → " + pubsTitlePrefixErratumWithoutSeeAlso.length,
+                buildList(pubsTitlePrefixErratumWithoutSeeAlso, comparepubs, "pub"));
 
     // Remove spinner
     if (document.getElementById("pub-input").classList.contains('loading')){
